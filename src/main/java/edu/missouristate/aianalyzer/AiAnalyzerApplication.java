@@ -3,24 +3,26 @@ package edu.missouristate.aianalyzer;
 
 import javafx.application.Application;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import edu.missouristate.aianalyzer.ui.JavaFxApplication;
 
 @SpringBootApplication
-@EnableScheduling // Enables @Scheduled
-@EnableAsync      // Enables @Async
+@EnableScheduling
+@EnableAsync
+@EntityScan(basePackages = "edu.missouristate.aianalyzer.model.database")
+@EnableJpaRepositories(basePackages = "edu.missouristate.aianalyzer.repository.database")
 public class AiAnalyzerApplication {
 	public static void main(String[] args) {
-        // Hand off control to the JavaFX Application launcher.
-        Application.launch(JavaFxApplication.class, args);
+		Application.launch(JavaFxApplication.class, args);
 	}
 
-
-    /**
-     * This bean is our startup script. It runs once when the application launches.
-     * It will kick off an ACTIVE scan on the user's Downloads folder.
-     */
+/**
+ * This bean is our startup script. It runs once when the application launches.
+ * It will kick off an ACTIVE scan on the user's Downloads folder.
+ */
 //    @Bean
 //    CommandLineRunner startBackgroundIndexer(ActiveScanService indexingService) {
 //        return args -> {

@@ -1,9 +1,7 @@
 package edu.missouristate.aianalyzer.service.database;
 
 import edu.missouristate.aianalyzer.model.database.ErrorLog;
-import edu.missouristate.aianalyzer.model.FileInterpretation;
-import edu.missouristate.aianalyzer.service.ai.ProcessFile;
-import edu.missouristate.aianalyzer.service.database.ErrorLogService;
+import edu.missouristate.aianalyzer.service.ai.ProcessFileService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +12,10 @@ import java.util.Locale;
 @Component
 public class ErrorRetryWorker {
     private final ErrorLogService errorLogService;
-    private final ProcessFile processFile;
-
-    public ErrorRetryWorker(ErrorLogService errorLogService, ProcessFile processFile) {
-        this.errorLogService = errorLogService;
-        this.processFile = processFile;
+    private final ProcessFileService processFileService;
+    public ErrorRetryWorker(ErrorLogService errorLogService, ProcessFileService processFileService) {
+             this.errorLogService = errorLogService;
+             this.processFileService = processFileService;
     }
 
     @Scheduled(fixedDelay = 60_000)
@@ -74,11 +71,7 @@ public class ErrorRetryWorker {
             }
 
 
-            String result = processFile.processFileAIResponse(
-                    p,
-                    ext,
-                    edu.missouristate.aianalyzer.model.FileInterpretation.SearchType.ACTIVE
-            );
+            String result = processFileService.processFileAIResponse(p, ext);
 
             if (result == null) return false;
 

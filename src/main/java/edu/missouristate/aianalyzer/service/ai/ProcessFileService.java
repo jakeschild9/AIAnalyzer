@@ -23,6 +23,8 @@ import static edu.missouristate.aianalyzer.service.ai.UploadFileService.uploadOb
 @Service
 @RequiredArgsConstructor
 public class ProcessFileService {
+    //Scan for virus
+    private final ScanForVirusService scanForVirusService;
     //AI query service
     private final AiQueryService AiQueryService;
     //Size of file
@@ -42,6 +44,16 @@ public class ProcessFileService {
         if (!Files.exists(filePath)) {
             return "File does not exist: " + filePath;
         }
+        //Call virus scan BEFORE any file readings happen
+        try {
+            boolean infected = scanForVirusService.scanFileWithClam(filePath);
+            if (infected) {
+                return "Virus detected in file: " + filePath.getFileName();
+            }
+        } catch (Exception e) {
+            return "Error scanning file: " + e.getMessage();
+        }
+
         fileSize = filePath.toFile().length();
         try {
             if (fileSize <= maxFileSize && SUPPORTED_FILE_TYPES.contains(fileType.toLowerCase())) {
