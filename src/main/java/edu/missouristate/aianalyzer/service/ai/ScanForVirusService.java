@@ -76,7 +76,7 @@ public class ScanForVirusService {
                 """;
                 Files.writeString(confFile, confContent);
             }
-            runCommand(freshclamExe.toString() + " --config-file=" + confFile);
+            runCommand(freshclamExe + " --config-file=" + confFile);
 
             if (!Files.exists(dbDir.resolve("main.cvd")) && !Files.exists(dbDir.resolve("main.cld"))) {
                 throw new IllegalStateException("ClamAV database not found at: " + dbDir);
@@ -119,32 +119,6 @@ public class ScanForVirusService {
         }
         if (!Files.exists(clamScanPath)) {
             throw new IllegalStateException("ClamAV executable not found at: " + clamScanPath);
-        }
-    }
-
-    private static Path getClamScanPathWindows() throws IOException, InterruptedException {
-        Process process = new ProcessBuilder("where", "clamscan").start();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String path = reader.readLine();
-            if (path != null && !path.isBlank()) {
-                return Paths.get(path);
-            } else {
-                Path defaultPath = Paths.get(System.getProperty("user.home"), "clamav", "clamscan.exe");
-                if (Files.exists(defaultPath)) {
-                    return defaultPath;
-                } else {
-                    throw new IllegalStateException("ClamAV executable not found on Windows.");
-                }
-            }
-        }
-    }
-
-    private static boolean isClamScanInstalled() {
-        try {
-            Process process = new ProcessBuilder("clamscan", "--version").start();
-            return process.waitFor() == 0;
-        } catch (IOException | InterruptedException e) {
-            return false;
         }
     }
 

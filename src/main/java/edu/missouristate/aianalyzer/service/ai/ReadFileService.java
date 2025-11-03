@@ -15,12 +15,22 @@ import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.yaml.snakeyaml.Yaml;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.nio.charset.StandardCharsets;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import static edu.missouristate.aianalyzer.service.ai.ReadImageService.changeExtension;
 import static edu.missouristate.aianalyzer.service.ai.ReadImageService.uploadJpgImage;
@@ -41,8 +51,13 @@ public class ReadFileService {
     public static String readFileAsString(Path filePath, String fileType) throws IOException {
         Path path = Paths.get(filePath.toUri());
 
-        return switch (fileType) {
-            case "txt", "md", "csv", "json" -> readFileAsString(path);
+        return switch (fileType.toLowerCase()) {
+            case "txt", "md", "csv" -> readFileAsString(path);
+            case "json" -> readJsonAsString(path);
+            case "jsonl", "ndjson" -> readJsonlAsString(path);
+            case "xml" -> readXmlAsString(path);
+            case "yaml", "yml" -> readYamlAsString(path);
+            case "html", "htm" -> readHtmlAsString(path);
             case "doc" -> readDocAsString(path);
             case "docx" -> readDocxAsString(path);
             case "xls", "xlsx" -> getExcelDataAsString(String.valueOf(filePath));
@@ -61,6 +76,25 @@ public class ReadFileService {
 
             default -> throw new IllegalArgumentException("Unknown document type: " + type);
         };
+    }
+
+    public static void uploadFile(Path filePath, String fileType) throws IOException {
+        if (!Files.exists(filePath)) {
+            throw new FileNotFoundException("File not found: " + filePath);
+        }
+
+        String data = readFileAsString(filePath, fileType);
+
+        try {
+            File outputFile = changeExtension(new File(String.valueOf(filePath)), ".txt");
+
+            Files.writeString(outputFile.toPath(), data);
+
+            uploadObject("files" + outputFile, String.valueOf(outputFile));
+            System.out.println("Temporary file created at: " + outputFile.toPath().toAbsolutePath());
+        } catch (Exception e) {
+            System.err.println("An error occurred while writing to the file: " + e.getMessage());
+        }
     }
 
     /**
@@ -224,5 +258,75 @@ public class ReadFileService {
             }
         }
         return sqlContent.toString();
+    }
+    public static String readJsonAsString(Path filePath) throws IOException {
+        return Files.readString(filePath, StandardCharsets.UTF_8);
+    }
+
+    public static String readJsonlAsString(Path filePath) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line.trim()).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String readXmlAsString(Path filePath) throws IOException {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setIgnoringComments(true);
+            factory.setIgnoringElementContentWhitespace(true);
+            factory.setNamespaceAware(true);
+
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(new FileReader(filePath.toFile())));
+
+            // Convert XML back to text for display
+            StringWriter writer = new StringWriter();
+            writeNode(document, "", writer);
+            return writer.toString();
+        } catch (SAXException | IOException | RuntimeException | javax.xml.parsers.ParserConfigurationException e) {
+            throw new IOException("Failed to parse XML file: " + e.getMessage(), e);
+        }
+    }
+
+    private static void writeNode(org.w3c.dom.Node node, String indent, Writer writer) throws IOException {
+        writer.write(indent + "<" + node.getNodeName() + ">");
+        if (node.hasChildNodes()) {
+            writer.write("\n");
+            for (int i = 0; i < node.getChildNodes().getLength(); i++) {
+                org.w3c.dom.Node child = node.getChildNodes().item(i);
+                if (child.getNodeType() == org.w3c.dom.Node.TEXT_NODE) {
+                    writer.write(indent + "  " + child.getTextContent().trim() + "\n");
+                } else {
+                    writeNode(child, indent + "  ", writer);
+                }
+            }
+        }
+        writer.write(indent + "</" + node.getNodeName() + ">\n");
+    }
+
+    public static String readYamlAsString(Path filePath) throws IOException {
+        Yaml yaml = new Yaml();
+        try (InputStream inputStream = Files.newInputStream(filePath)) {
+            Iterable<Object> yamlObjects = yaml.loadAll(inputStream);
+            StringBuilder sb = new StringBuilder();
+            for (Object obj : yamlObjects) {
+                if (obj instanceof Map<?, ?> map) {
+                    sb.append(map.toString()).append("\n");
+                } else {
+                    sb.append(String.valueOf(obj)).append("\n");
+                }
+            }
+            return sb.toString();
+        }
+    }
+
+    public static String readHtmlAsString(Path filePath) throws IOException {
+        String html = Files.readString(filePath, StandardCharsets.UTF_8);
+        return Jsoup.parse(html).text(); // Extracts visible text content
     }
 }

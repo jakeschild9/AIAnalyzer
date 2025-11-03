@@ -86,8 +86,12 @@ public class ProcessFileService {
             return "File does not exist: " + filePath;
         }
         try {
-            //uploadFileAsTxtOrPdf(Path.of("files" + filePath), fileType);
-            return AiQueryService.activeResponseFromLargeFile("gs://aianalyser/files" + filePath, readDocumentType(fileType));
+            Path parentDir = filePath.getParent();
+            String newFileName = filePath.getFileName().toString().replaceFirst("\\.[^.]+$", ".txt");
+            Path newFilePath = parentDir.resolve(newFileName).toAbsolutePath();
+            uploadFile(filePath, fileType);
+
+            return AiQueryService.activeResponseFromLargeFile("gs://aianalyser/files" + newFilePath, readDocumentType(fileType));
         } catch (IOException e) {
             return "Error processing file: " + e.getMessage();
         }

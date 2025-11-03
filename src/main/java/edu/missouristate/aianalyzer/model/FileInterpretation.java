@@ -11,8 +11,7 @@ public class FileInterpretation {
 
     public static final Set<String> SUPPORTED_FILE_TYPES = Set.of(
             "txt", "md", "csv", "sql", "json", "jsonl", "ndjson", "xml", "yaml", "yml", "html", "htm",
-            "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf",
-            "gdoc", "gsheet", "gslides", "gdraw"
+            "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf"
     );
 
     public static final Set<String> VIRUS_FILE_TYPES = Set.of(
@@ -22,6 +21,8 @@ public class FileInterpretation {
             "zip", "rar", "7z", "tar", "gz", "iso",
             "apk", "dmg", "bin", "vxd"
     );
+
+
 
     public static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of(
             "jpg","jpeg","png","webp"
