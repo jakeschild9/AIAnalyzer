@@ -168,7 +168,7 @@ public class PassiveScanService {
     private ScanQueueItem createQueueItem(Path path) {
         ScanQueueItem item = new ScanQueueItem();
         item.setPath(path.toString());
-        item.setKind("file");
+        //item.setKind("file");
         item.setNotBeforeUnix(Instant.now().getEpochSecond());
         item.setAttempts(0);
         return item;

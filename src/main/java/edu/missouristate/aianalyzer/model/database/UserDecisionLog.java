@@ -12,11 +12,7 @@ import java.time.Instant;
                 @Index(name = "idx_udl_filetype", columnList = "file_type")
         }
 )
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class UserDecisionLog {
 
     @Id
@@ -36,9 +32,11 @@ public class UserDecisionLog {
     @Column(name="decision", nullable=false)
     private DecisionType decision;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="ai_label")
-    private AiLabel aiLabel;
+    @Column(name="virus_infected")
+    private Boolean virusInfected;
+
+    @Column(name="ai_summary_excerpt", length = 512)
+    private String aiSummaryExcerpt;
 
     @Column(name="success", nullable=false)
     private Boolean success;
@@ -50,4 +48,3 @@ public class UserDecisionLog {
     @Column(name="created_at")
     private Instant createdAt;
 }
-

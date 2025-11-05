@@ -156,7 +156,7 @@ public class ActiveScanService {
         try {
             ScanQueueItem item = new ScanQueueItem();
             item.setPath(file.toAbsolutePath().toString());
-            item.setKind(kind);
+            item.setKind(ScanQueueItem.Kind.ACTIVE_AI);
             item.setNotBeforeUnix(Instant.now().getEpochSecond());
             item.setAttempts(0);
             scanQueueItemRepository.save(item);

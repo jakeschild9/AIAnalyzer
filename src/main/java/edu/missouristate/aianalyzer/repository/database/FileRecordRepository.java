@@ -11,4 +11,5 @@ public interface FileRecordRepository extends JpaRepository<FileRecord, Long> {
     // Spring Data JPA gives us findAll(), save(), etc. for free.
     // We can add custom methods like this one.
     Optional<FileRecord> findByPath(String path);
+    Optional<FileRecord> findTopByContentHashOrderByAiAnalyzedUnixDesc(String contentHash);
 }

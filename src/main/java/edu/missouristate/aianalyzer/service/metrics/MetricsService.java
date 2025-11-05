@@ -22,76 +22,67 @@ public class MetricsService {
         return type.trim().toLowerCase(Locale.ROOT);
     }
 
-    /** Called when file is scanned by AI */
     @Transactional
-    public void recordScan(String fileType) {
+    public void recordActiveDescribe(String fileType) {
         String ft = normalize(fileType);
         var m = metricsRepo.findByFileType(ft).orElseGet(() -> fresh(ft));
-        m.setScansCount(m.getScansCount() + 1);
+        m.setAiDescribeCount(m.getAiDescribeCount() + 1);
         m.setUpdatedAt(Instant.now());
         metricsRepo.save(m);
+
+        var s = summaryRepo.findById(1).orElseGet(() -> MetricsSummary.builder().id(1).build());
+        s.setTotalActiveDescriptions(s.getTotalActiveDescriptions() + 1);
+        summaryRepo.save(s);
     }
 
-    /** Called when AI assigns a label */
     @Transactional
-    public void recordAiLabel(String fileType, AiLabel label) {
+    public void recordVirusScan(String fileType, boolean infected) {
         String ft = normalize(fileType);
         var m = metricsRepo.findByFileType(ft).orElseGet(() -> fresh(ft));
-        switch (label) {
-            case MALICIOUS -> m.setAiFlagMaliciousCount(m.getAiFlagMaliciousCount() + 1);
-            case SUSPICIOUS -> m.setAiFlagSuspiciousCount(m.getAiFlagSuspiciousCount() + 1);
-            case SAFE -> { /* no counter now */ }
-        }
+        m.setVirusScanCount(m.getVirusScanCount() + 1);
+        if (infected) m.setVirusPositiveCount(m.getVirusPositiveCount() + 1);
         m.setUpdatedAt(Instant.now());
         metricsRepo.save(m);
+
+        var s = summaryRepo.findById(1).orElseGet(() -> MetricsSummary.builder().id(1).build());
+        s.setTotalVirusScans(s.getTotalVirusScans() + 1);
+        if (infected) s.setTotalVirusPositives(s.getTotalVirusPositives() + 1);
+        summaryRepo.save(s);
     }
 
-    /** Called when user does something on AI Summary page */
     @Transactional
     public void recordUserDecision(String userId,
                                    String fileId,
                                    String fileType,
                                    DecisionType decision,
-                                   AiLabel aiLabel,
+                                   Boolean virusInfectedAtDecision,
+                                   String aiSummaryExcerpt,
                                    boolean success,
                                    String contextJson) {
 
-        // 1. Append log
         var entry = UserDecisionLog.builder()
                 .userId(userId)
                 .fileId(fileId)
                 .fileType(normalize(fileType))
                 .decision(decision)
-                .aiLabel(aiLabel)
+                .virusInfected(virusInfectedAtDecision)
+                .aiSummaryExcerpt(aiSummaryExcerpt)
                 .success(success)
                 .contextJson(contextJson)
                 .createdAt(Instant.now())
                 .build();
         decisionRepo.save(entry);
 
-        // 2. Update metrics
         String ft = normalize(fileType);
         var m = metricsRepo.findByFileType(ft).orElseGet(() -> fresh(ft));
-
         switch (decision) {
             case DELETE -> {
                 m.setUserDeleteCount(m.getUserDeleteCount() + 1);
-                if (success)
-                    m.setUserSuccessDeleteCount(m.getUserSuccessDeleteCount() + 1);
+                if (success) m.setUserSuccessDeleteCount(m.getUserSuccessDeleteCount() + 1);
             }
             case QUARANTINE -> m.setUserQuarantineCount(m.getUserQuarantineCount() + 1);
             case IGNORE -> m.setUserIgnoreCount(m.getUserIgnoreCount() + 1);
         }
-
-        m.setUpdatedAt(Instant.now());
-        metricsRepo.save(m);
-    }
-
-    @Transactional
-    public void recordFocusOnType(String fileType) {
-        String ft = normalize(fileType);
-        var m = metricsRepo.findByFileType(ft).orElseGet(() -> fresh(ft));
-        m.setFocusCount(m.getFocusCount() + 1);
         m.setUpdatedAt(Instant.now());
         metricsRepo.save(m);
     }
@@ -103,12 +94,12 @@ public class MetricsService {
                 .userDeleteCount(0)
                 .userQuarantineCount(0)
                 .userIgnoreCount(0)
-                .aiFlagMaliciousCount(0)
-                .aiFlagSuspiciousCount(0)
                 .userSuccessDeleteCount(0)
                 .focusCount(0)
+                .aiDescribeCount(0)
+                .virusScanCount(0)
+                .virusPositiveCount(0)
                 .updatedAt(Instant.now())
                 .build();
     }
 }
-

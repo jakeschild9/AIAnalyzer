@@ -24,14 +24,25 @@ public class FileTypeMetrics {
     private String fileType;
 
     @Builder.Default private Integer scansCount = 0;
+    @Builder.Default private Integer focusCount = 0;
+
     @Builder.Default private Integer userDeleteCount = 0;
     @Builder.Default private Integer userQuarantineCount = 0;
     @Builder.Default private Integer userIgnoreCount = 0;
-    @Builder.Default private Integer aiFlagMaliciousCount = 0;
-    @Builder.Default private Integer aiFlagSuspiciousCount = 0;
     @Builder.Default private Integer userSuccessDeleteCount = 0;
-    @Builder.Default private Integer focusCount = 0;
+
+
+    @Builder.Default private Integer aiDescribeCount = 0;
+    @Builder.Default private Integer virusScanCount = 0;
+
+    @Builder.Default private Integer virusPositiveCount = 0;
 
     @Column(name="updated_at")
     private Instant updatedAt;
+
+    @Deprecated @Builder.Default
+    private Integer aiFlagMaliciousCount = 0;
+
+    @Deprecated @Builder.Default
+    private Integer aiFlagSuspiciousCount = 0;
 }

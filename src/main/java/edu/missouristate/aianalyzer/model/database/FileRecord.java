@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "files") // This ensures it maps to the 'files' table from DataTable.sql
+@Table(name = "files")
 public class FileRecord {
 
     @Id
@@ -19,8 +19,8 @@ public class FileRecord {
     private long sizeBytes;
     private long mtimeUnix;
     private Long ctimeUnix;
-    private long lastScannedUnix;
-    private String contentHash;
+    private long lastScannedUnix; // passive timestamps
+    private String contentHash;   // AI cache
     private String kind;
     private String typeLabel;
     private Double typeLabelConfidence;
@@ -28,8 +28,23 @@ public class FileRecord {
     private Long typeLabelUpdatedUnix;
     private String ext;
 
-    // These columns were added via 'ALTER TABLE' in the old DatabaseManager
+    @Deprecated
     private String aiSafety;
-    @Column(length = 1024) // It's good practice to define a length for potentially long text fields
+
+    @Deprecated
+    @Column(length = 1024)
     private String aiResponse;
+
+    // AI description fields
+    @Column(name = "ai_summary", length = 20000)
+    private String aiSummary;
+
+    @Column(name = "ai_labels_json", length = 4000)
+    private String aiLabelsJson;
+
+    @Column(name = "ai_confidence")
+    private Double aiConfidence;
+
+    @Column(name = "ai_analyzed_unix")
+    private Long aiAnalyzedUnix;
 }
