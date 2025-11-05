@@ -1,19 +1,16 @@
 package edu.missouristate.aianalyzer.service.ai;
 
 
-import edu.missouristate.aianalyzer.model.FileInterpretation;
+import edu.missouristate.aianalyzer.utility.ai.AiQueryUtil;
+import edu.missouristate.aianalyzer.utility.ai.ReadFileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.*;
 
 import static edu.missouristate.aianalyzer.model.FileInterpretation.SUPPORTED_FILE_TYPES;
-import static edu.missouristate.aianalyzer.model.FileInterpretation.VIRUS_FILE_TYPES;
-import static edu.missouristate.aianalyzer.service.ai.ReadFileService.*;
-import static edu.missouristate.aianalyzer.service.ai.UploadFileService.uploadObject;
+import static edu.missouristate.aianalyzer.utility.ai.ReadFileUtil.*;
 
 /**
  * This service is responsible for processing files and interacting with an AI service for analysis.
@@ -26,7 +23,7 @@ public class ProcessFileService {
     //Scan for virus
     private final ScanForVirusService scanForVirusService;
     //AI query service
-    private final AiQueryService AiQueryService;
+    private final AiQueryUtil AiQueryService;
     //Size of file
     static long fileSize;
     //Max file size before entering into Google Cloud (8MB)
@@ -78,7 +75,7 @@ public class ProcessFileService {
      */
     private String processSmallFileAIResponse(Path filePath, String fileType) throws IOException {
         try {
-            String fileContent = ReadFileService.readFileAsString(filePath, fileType);
+            String fileContent = ReadFileUtil.readFileAsString(filePath, fileType);
             return AiQueryService.activeResponseFromFile(fileContent);
         } catch (IOException e) {
             return "Error processing file: " + e.getMessage();

@@ -1,10 +1,6 @@
-package edu.missouristate.aianalyzer.service.ai;
+package edu.missouristate.aianalyzer.utility.ai;
 
-import edu.missouristate.aianalyzer.model.FileInterpretation;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
@@ -32,12 +28,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import static edu.missouristate.aianalyzer.service.ai.ReadImageService.changeExtension;
-import static edu.missouristate.aianalyzer.service.ai.ReadImageService.uploadJpgImage;
-import static edu.missouristate.aianalyzer.service.ai.UploadFileService.uploadObject;
+import static edu.missouristate.aianalyzer.utility.ai.ReadImageUtil.changeExtension;
+import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObject;
 
 @Service
-public class ReadFileService {
+public class ReadFileUtil {
 
     /**
      * Reads a file as a string by automatically selecting

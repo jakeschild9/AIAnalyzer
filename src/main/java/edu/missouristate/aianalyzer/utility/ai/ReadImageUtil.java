@@ -1,4 +1,4 @@
-package edu.missouristate.aianalyzer.service.ai;
+package edu.missouristate.aianalyzer.utility.ai;
 
 import edu.missouristate.aianalyzer.model.FileInterpretation;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +18,11 @@ import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static edu.missouristate.aianalyzer.service.ai.UploadFileService.uploadObject;
+import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObject;
 
 @Service
 @RequiredArgsConstructor
-public class ReadImageService {
+public class ReadImageUtil {
     private static Path magickPath;
     private static final String MAGICK_WINDOWS_URL = "https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-portable-Q16-x64.zip";
     private static final String MAGICK_MAC_URL = "https://imagemagick.org/archive/binaries/magick";

@@ -1,4 +1,4 @@
-package edu.missouristate.aianalyzer.service.ai;
+package edu.missouristate.aianalyzer.utility.ai;
 
 import com.google.genai.Client;
 import com.google.genai.types.Content;
@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-
-import static edu.missouristate.aianalyzer.service.ai.UploadFileService.uploadObject;
 
 /**
  * Service responsible for making API calls to the Google Gemini AI model.
@@ -19,7 +16,7 @@ import static edu.missouristate.aianalyzer.service.ai.UploadFileService.uploadOb
  */
 @Service
 @RequiredArgsConstructor
-public class AiQueryService {
+public class AiQueryUtil {
     private final Client client;
 
     /**

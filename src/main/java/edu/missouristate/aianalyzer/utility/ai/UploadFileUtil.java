@@ -1,7 +1,6 @@
-package edu.missouristate.aianalyzer.service.ai;
+package edu.missouristate.aianalyzer.utility.ai;
 
 
-import com.google.genai.Client;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +15,7 @@ import java.nio.file.Paths;
 
 @Service
 @RequiredArgsConstructor
-public class UploadFileService {
+public class UploadFileUtil {
     public static void uploadObject(String objectName, String filePath) throws IOException {
         // The ID of your GCP project
         String projectId = "basic-dispatch-476219-m5";
