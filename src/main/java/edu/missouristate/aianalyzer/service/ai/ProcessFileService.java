@@ -5,6 +5,7 @@ import edu.missouristate.aianalyzer.utility.ai.AiQueryUtil;
 import edu.missouristate.aianalyzer.utility.ai.ReadFileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import edu.missouristate.aianalyzer.service.database.VirusScanService;
 
 import java.io.*;
 import java.nio.file.*;
@@ -24,6 +25,8 @@ public class ProcessFileService {
     private final ScanForVirusService scanForVirusService;
     //AI query service
     private final AiQueryUtil AiQueryService;
+
+    private final VirusScanService virusScanService;
     //Size of file
     static long fileSize;
     //Max file size before entering into Google Cloud (8MB)
@@ -43,7 +46,7 @@ public class ProcessFileService {
         }
         //Call virus scan BEFORE any file readings happen
         try {
-            boolean infected = scanForVirusService.scanFileWithClam(filePath);
+            boolean infected = virusScanService.scanAndPersist(filePath);
             if (infected) {
                 return "Virus detected in file: " + filePath.getFileName();
             }

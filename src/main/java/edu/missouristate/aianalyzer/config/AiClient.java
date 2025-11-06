@@ -1,30 +1,39 @@
 package edu.missouristate.aianalyzer.config;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import java.io.FileInputStream;
-
-/**
- * Spring configuration class responsible for creating and providing the Gemini AI client
- * as a managed bean in the application context.
- */
 @Lazy
 @Configuration
 public class AiClient {
-    /**
-     * Creates and configures the Google Gemini AI client bean.
-     * This bean can then be injected into other services that need to interact with the AI.
-     * @return A configured instance of the {@link Client}.
-     * @throws Exception if an error occurs during the client build process.
-     */
+
     @Bean
-    public Client googleGenAiClient() throws Exception {
+    public Client googleGenAiClient(
+            @Value("${genai.project:}") String project,
+            @Value("${genai.location:us-central1}") String location,
+            @Value("${genai.api-key:}") String apiKey // optional fallback (non-Vertex)
+    ) {
+        if (apiKey != null && !apiKey.isBlank()) {
+            // Non-Vertex (API key) mode
+            return Client.builder()
+                    .apiKey(apiKey)
+                    .build();
+        }
+
+        if (project == null || project.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Missing genai.project. For Vertex AI you must set genai.project and genai.location."
+            );
+        }
+
+        // Vertex AI mode (uses ADC from GOOGLE_APPLICATION_CREDENTIALS)
         return Client.builder()
                 .vertexAI(true)
+                .project(project)
+                .location(location)
                 .build();
     }
 }

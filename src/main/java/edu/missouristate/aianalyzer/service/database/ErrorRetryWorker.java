@@ -1,18 +1,22 @@
 package edu.missouristate.aianalyzer.service.database;
 
 import edu.missouristate.aianalyzer.model.database.ErrorLog;
+import edu.missouristate.aianalyzer.model.database.ScanQueueItem;
+import edu.missouristate.aianalyzer.repository.database.ScanQueueItemRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Path;
+import java.time.Instant;
 
 @Component
 public class ErrorRetryWorker {
     private final ErrorLogService errorLogService;
-    private final ActiveScanService activeScanService;
-    public ErrorRetryWorker(ErrorLogService errorLogService, ActiveScanService activeScanService) {
+    private final ScanQueueItemRepository scanQueueItemRepository;
+
+    public ErrorRetryWorker(ErrorLogService errorLogService,
+                            ScanQueueItemRepository scanQueueItemRepository) {
         this.errorLogService = errorLogService;
-        this.activeScanService = activeScanService;
+        this.scanQueueItemRepository = scanQueueItemRepository;
     }
 
     @Scheduled(fixedDelay = 60_000)
@@ -22,16 +26,22 @@ public class ErrorRetryWorker {
             if (pathStr == null || pathStr.isBlank()) continue;
 
             errorLogService.markRetrying(e.getId());
-            boolean ok = requeueActiveAiIfAllowed(pathStr);
+            boolean ok = enqueueActiveAi(pathStr);
             if (ok) {
                 errorLogService.markResolved(e.getId());
             }
         }
     }
 
-    private boolean requeueActiveAiIfAllowed(String pathStr) {
+    private boolean enqueueActiveAi(String pathStr) {
         try {
-            return activeScanService.requestActiveDescriptionByPath(Path.of(pathStr));
+            ScanQueueItem item = new ScanQueueItem();
+            item.setPath(pathStr);
+            item.setKind(ScanQueueItem.Kind.ACTIVE_AI); // <-- enum, not a String
+            item.setNotBeforeUnix(Instant.now().getEpochSecond());
+            item.setAttempts(0);
+            scanQueueItemRepository.save(item);
+            return true;
         } catch (Exception ex) {
             return false;
         }
