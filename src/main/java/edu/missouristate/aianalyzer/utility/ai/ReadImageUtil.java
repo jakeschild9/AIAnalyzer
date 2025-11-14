@@ -9,25 +9,27 @@ import org.im4java.process.ProcessStarter;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Locale;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
+import static edu.missouristate.aianalyzer.utility.ai.ImageMagickDownloadUtil.ensureImageMagickInstalled;
+import static edu.missouristate.aianalyzer.utility.ai.ImageMagickDownloadUtil.magickPath;
 import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObject;
 
+/**
+ * Utility service for reading and processing image files.
+ * Provides methods for detecting image types, converting images to JPG,
+ * and uploading images to storage.
+ */
 @Service
 @RequiredArgsConstructor
 public class ReadImageUtil {
-    private static Path magickPath;
-    private static final String MAGICK_WINDOWS_URL = "https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-portable-Q16-x64.zip";
-    private static final String MAGICK_MAC_URL = "https://imagemagick.org/archive/binaries/magick";
-    private static final String MAGICK_LINUX_URL = "https://imagemagick.org/archive/binaries/magick";
 
+    /**
+     * Determines the internal file type representation based on a common image extension.
+     *
+     * @param type the image file extension (e.g., "png", "jpg", "webp")
+     * @return the corresponding internal FileType string
+     * @throws IOException if the image type is unknown or unsupported
+     */
     public static String readImageType(String type) throws IOException {
         return switch (type.toLowerCase()) {
             case "png" -> FileInterpretation.FileType.PNG.getType();
@@ -38,134 +40,50 @@ public class ReadImageUtil {
         };
     }
 
+    /**
+     * Converts any image to a JPG format using ImageMagick and uploads it.
+     * Ensures ImageMagick is installed, changes the file extension, and uploads
+     * the converted file to storage.
+     *
+     * @param inputFilePath the path to the original image file
+     * @throws IOException      if the input file cannot be read or written
+     * @throws InterruptedException if the ImageMagick conversion process is interrupted
+     * @throws IM4JavaException if an error occurs during ImageMagick execution
+     */
     public static void uploadJpgImage(String inputFilePath) throws IOException, InterruptedException, IM4JavaException {
         ensureImageMagickInstalled();
 
+        // Set global ImageMagick search path
         ProcessStarter.setGlobalSearchPath(magickPath.getParent().toString());
 
+        // Change file extension to .jpg
         File outputFile = changeExtension(new File(inputFilePath), ".jpg");
 
+        // Prepare ImageMagick operation
         IMOperation op = new IMOperation();
         op.addImage(inputFilePath);
         op.addImage(outputFile.getAbsolutePath());
 
+        // Execute conversion
         ConvertCmd convert = new ConvertCmd(false);
         convert.run(op);
 
         System.out.println("Converted to " + outputFile.getAbsolutePath());
 
+        // Upload converted image
         uploadObject("images" + outputFile.getAbsolutePath(), outputFile.getAbsolutePath());
     }
 
+    /**
+     * Changes the file extension of the given file to a new extension.
+     *
+     * @param f            the original file
+     * @param newExtension the new file extension (including the dot, e.g., ".jpg")
+     * @return a new File object with the updated extension in the same directory
+     */
     public static File changeExtension(File f, String newExtension) {
         int i = f.getName().lastIndexOf('.');
-        String name = f.getName().substring(0,i);
+        String name = f.getName().substring(0, i);
         return new File(f.getParent(), name + newExtension);
-    }
-
-    /**
-     * Ensures ImageMagick (and im4java tool configuration) is installed and configured.
-     */
-    private static void ensureImageMagickInstalled() throws IOException, InterruptedException {
-        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-        Path installDir = Paths.get(System.getProperty("user.home"), "imagemagick");
-        Files.createDirectories(installDir);
-
-        if (os.contains("win")) {
-            magickPath = installDir.resolve("ImageMagick-7.1.1-portable-Q16-x64/magick.exe");
-            if (!Files.exists(magickPath)) {
-                System.out.println("⬇️ Downloading ImageMagick for Windows...");
-                Path zipPath = installDir.resolve("imagemagick.zip");
-                downloadFile(MAGICK_WINDOWS_URL, zipPath);
-                unzip(zipPath, installDir);
-            }
-            if (!Files.exists(magickPath)) {
-                throw new IOException("Failed to locate ImageMagick executable at " + magickPath);
-            }
-            ProcessStarter.setGlobalSearchPath(magickPath.getParent().toString());
-            System.out.println("ImageMagick configured: " + magickPath);
-
-        } else if (os.contains("mac")) {
-            magickPath = Paths.get("/usr/local/bin/magick"); // Intel
-            if (!Files.exists(magickPath)) {
-                magickPath = Paths.get("/opt/homebrew/bin/magick"); // Apple Silicon
-            }
-
-            if (!Files.exists(magickPath)) {
-                System.out.println("⬇️ Installing ImageMagick via Homebrew...");
-                runCommand("brew install imagemagick");
-                magickPath = Paths.get("/usr/local/bin/magick");
-                if (!Files.exists(magickPath)) {
-                    magickPath = Paths.get("/opt/homebrew/bin/magick");
-                }
-            }
-
-            if (!Files.exists(magickPath)) {
-                throw new IOException("Failed to install or locate ImageMagick on macOS.");
-            }
-
-            ProcessStarter.setGlobalSearchPath(magickPath.getParent().toString());
-            System.out.println("ImageMagick configured: " + magickPath);
-
-        } else {
-            magickPath = Paths.get("/usr/bin/magick");
-            if (!Files.exists(magickPath)) {
-                System.out.println("⬇️ Installing ImageMagick via package manager...");
-                runCommand("sudo apt-get update && sudo apt-get install -y imagemagick");
-            }
-
-            if (!Files.exists(magickPath)) {
-                throw new IOException("Failed to install ImageMagick on Linux.");
-            }
-
-            ProcessStarter.setGlobalSearchPath(magickPath.getParent().toString());
-            System.out.println("ImageMagick configured: " + magickPath);
-        }
-    }
-
-    /**
-     * Downloads a file from a URL.
-     */
-    private static void downloadFile(String url, Path target) throws IOException {
-        System.out.println("Downloading from: " + url);
-        try (InputStream in = URI.create(url).toURL().openStream()) {
-            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-        }
-    }
-
-    /**
-     * Unzips a .zip archive into a target directory.
-     */
-    private static void unzip(Path zipFile, Path targetDir) throws IOException {
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                Path newFile = targetDir.resolve(entry.getName());
-                if (entry.isDirectory()) {
-                    Files.createDirectories(newFile);
-                } else {
-                    Files.createDirectories(newFile.getParent());
-                    Files.copy(zis, newFile, StandardCopyOption.REPLACE_EXISTING);
-                }
-            }
-        }
-    }
-
-    /**
-     * Runs a shell command (used for Linux installs).
-     */
-    private static void runCommand(String command) throws IOException {
-        try {
-            Process process = new ProcessBuilder("bash", "-c", command)
-                    .inheritIO()
-                    .start();
-            int exit = process.waitFor();
-            if (exit != 0) {
-                throw new IOException("Command failed: " + command);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Command interrupted: " + command, e);
-        }
     }
 }

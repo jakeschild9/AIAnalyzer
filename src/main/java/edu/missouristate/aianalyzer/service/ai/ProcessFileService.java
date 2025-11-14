@@ -1,8 +1,6 @@
 package edu.missouristate.aianalyzer.service.ai;
 
-
 import edu.missouristate.aianalyzer.utility.ai.AiQueryUtil;
-import edu.missouristate.aianalyzer.utility.ai.ReadFileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import edu.missouristate.aianalyzer.service.database.VirusScanService;
@@ -11,40 +9,53 @@ import java.io.*;
 import java.nio.file.*;
 
 import static edu.missouristate.aianalyzer.model.FileInterpretation.SUPPORTED_FILE_TYPES;
-import static edu.missouristate.aianalyzer.utility.ai.ReadFileUtil.*;
 
 /**
- * This service is responsible for processing files and interacting with an AI service for analysis.
- * It differentiates between small and large files, processing them in a memory-efficient manner
- * by reading large files in chunks to avoid loading the entire file into memory.
+ * Service responsible for scanning files for viruses and then passing them to the AI
+ * for content interpretation. If the file exceeds the maximum size limit for direct
+ * processing, it is uploaded to Google Cloud for remote analysis.
+ *
+ * The workflow:
+ * 1. Verify the file exists.
+ * 2. Scan the file for viruses through the VirusScanService.
+ * 3. Determine whether the file should be processed locally or uploaded to cloud storage.
+ * 4. Request an AI-generated description of the file contents.
  */
 @Service
 @RequiredArgsConstructor
 public class ProcessFileService {
-    //Scan for virus
-    private final ScanForVirusService scanForVirusService;
-    //AI query service
-    private final AiQueryUtil AiQueryService;
 
+    /** Virus scanning service used to detect and persist scan results. */
     private final VirusScanService virusScanService;
-    //Size of file
+
+    /** Size of the current file being processed. */
     static long fileSize;
-    //Max file size before entering into Google Cloud (8MB)
-    static final int maxFileSize = 8 * 1024 * 1024; // 8MB
+
+    /** Maximum size threshold (8 MB) before processing is delegated to Google Cloud. */
+    static final int maxFileSize = 8 * 1024 * 1024;
 
     /**
-     * Determines whether to process the file as small or large based on its size and gets the AI response.
+     * Processes a file by first scanning it for viruses and then submitting it
+     * for AI interpretation. Files larger than the defined size threshold are
+     * handled through Google Cloud.
      *
-     * @param filePath   The path to the file to be processed.
-     * @param fileType   The type of file being processed.
-     * @return The AI's response as a String, or an error message.
-     * @throws IOException If an error occurs during file processing.
+     * Steps performed:
+     * 1. Ensures the file exists.
+     * 2. Scans the file for viruses. If infected, processing stops.
+     * 3. Determines whether the file is small or large based on size.
+     * 4. Sends the file to the appropriate AI processing method.
+     *
+     * @param filePath the path to the file that will be processed
+     * @param fileType the extension or format of the file
+     * @return an AI-generated response describing the file contents, or an error message
+     * @throws IOException if file reading or processing fails
      */
     public String processFileAIResponse(Path filePath, String fileType) throws IOException {
         if (!Files.exists(filePath)) {
             return "File does not exist: " + filePath;
         }
-        //Call virus scan BEFORE any file readings happen
+
+        // Perform virus scan before reading or processing the file
         try {
             boolean infected = virusScanService.scanAndPersist(filePath);
             if (infected) {
@@ -55,68 +66,22 @@ public class ProcessFileService {
         }
 
         fileSize = filePath.toFile().length();
+
         try {
-            if (fileSize <= maxFileSize && SUPPORTED_FILE_TYPES.contains(fileType.toLowerCase())) {
-                return processSmallFileAIResponse(filePath, fileType);
-            } else if (SUPPORTED_FILE_TYPES.contains(fileType.toLowerCase())) {
-                return processLargeFileAIResponse(filePath, fileType);
+            if (SUPPORTED_FILE_TYPES.contains(fileType.toLowerCase())) {
+
+                if (fileSize <= maxFileSize) {
+                    return AiQueryUtil.processSmallFileAIResponse(filePath, fileType);
+                } else {
+                    return AiQueryUtil.processLargeFileAIResponse(filePath, fileType);
+                }
+
             } else {
                 return "This file type cannot be processed: " + fileType;
             }
+
         } catch (IOException e) {
             return "Error processing file: " + e.getMessage();
         }
-    }
-
-    /**
-     * Processes files smaller than or equal to the maxFileSize by reading the entire content into memory.
-     *
-     * @param filePath   The path to the small file.
-     * @param fileType   The type of file being processed.
-     * @return The AI's response as a String.
-     * @throws IOException If an error occurs while reading the file.
-     */
-    private String processSmallFileAIResponse(Path filePath, String fileType) throws IOException {
-        try {
-            String fileContent = ReadFileUtil.readFileAsString(filePath, fileType);
-            return AiQueryService.activeResponseFromFile(fileContent);
-        } catch (IOException e) {
-            return "Error processing file: " + e.getMessage();
-        }
-    }
-
-    /**
-     * Processes files larger than maxFileSize by reading them in sequential, memory-mapped chunks.
-     * It analyzes each chunk and can short-circuit if a non-"Safe" classification is found.
-     *
-     * @param filePath   The path to the large file.
-     * @return The normalized AI response, combining classification and description.
-     * @throws IOException If an I/O error occurs.
-     */
-    public String processLargeFileAIResponse(Path filePath, String fileType) throws IOException {
-        if (!Files.exists(filePath)) {
-            return "File does not exist: " + filePath;
-        }
-        try {
-            Path parentDir = filePath.getParent();
-            String newFileName = filePath.getFileName().toString().replaceFirst("\\.[^.]+$", ".txt");
-            Path newFilePath = parentDir.resolve(newFileName).toAbsolutePath();
-            uploadFile(filePath, fileType);
-
-            return AiQueryService.activeResponseFromLargeFile("gs://aianalyser/files" + newFilePath, readDocumentType(fileType));
-        } catch (IOException e) {
-            return "Error processing file: " + e.getMessage();
-        }
-    }
-
-    /**
-     * A static helper method to format the AI's classification and description into a single, delimited string.
-     *
-     * @param description    The textual description from the AI.
-     * @param classification The classification category from the AI.
-     * @return A single string in the format "classification|description".
-     */
-    static String normalizeResponse(String description, String classification) {
-        return classification + "|" + description;
     }
 }

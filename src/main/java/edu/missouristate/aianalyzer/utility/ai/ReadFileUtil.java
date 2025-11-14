@@ -35,12 +35,11 @@ import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObjec
 public class ReadFileUtil {
 
     /**
-     * Reads a file as a string by automatically selecting
-     * the appropriate extraction method based on file type.
+     * Reads a file as a string based on its type.
      *
-     * @param filePath the path to the file to read
-     * @param fileType the type of the file (e.g., "pdf", "docx", "txt")
-     * @return the full text content of the file
+     * @param filePath the path to the file
+     * @param fileType the type of the file (e.g., txt, docx, pdf)
+     * @return the file content as a string
      * @throws IOException if the file type is unsupported or cannot be read
      */
     public static String readFileAsString(Path filePath, String fileType) throws IOException {
@@ -63,16 +62,29 @@ public class ReadFileUtil {
         };
     }
 
+    /**
+     * Returns the MIME type of a document based on its extension.
+     *
+     * @param type the file type
+     * @return the MIME type string
+     * @throws IOException if the document type is unknown
+     */
     public static String readDocumentType(String type) throws IOException {
         return switch (type.toLowerCase()) {
             case "txt", "md", "csv", "json", "sql" -> "text/plain";
             case "doc", "docx", "xls", "xlsx", "ppt", "pptx" -> "text/plain";
             case "pdf" -> "application/pdf";
-
             default -> throw new IllegalArgumentException("Unknown document type: " + type);
         };
     }
 
+    /**
+     * Uploads a file by converting it to a temporary .txt file and sending it to storage.
+     *
+     * @param filePath the original file path
+     * @param fileType the file type
+     * @throws IOException if an I/O error occurs
+     */
     public static void uploadFile(Path filePath, String fileType) throws IOException {
         if (!Files.exists(filePath)) {
             throw new FileNotFoundException("File not found: " + filePath);
@@ -82,9 +94,7 @@ public class ReadFileUtil {
 
         try {
             File outputFile = changeExtension(new File(String.valueOf(filePath)), ".txt");
-
             Files.writeString(outputFile.toPath(), data);
-
             uploadObject("files" + outputFile, String.valueOf(outputFile));
             System.out.println("Temporary file created at: " + outputFile.toPath().toAbsolutePath());
         } catch (Exception e) {
@@ -93,22 +103,18 @@ public class ReadFileUtil {
     }
 
     /**
-     * Reads plain text-based files into a string.
+     * Reads a plain text file into a string.
      *
-     * @param filePath the path to a text, CSV, or JSON file
-     * @return the file content as a string
-     * @throws IOException if the file cannot be read
+     * @param filePath the path to the file
+     * @return the content of the file
+     * @throws IOException if reading fails
      */
     private static String readFileAsString(Path filePath) throws IOException {
         return Files.readString(filePath);
     }
 
     /**
-     * Extracts text from Microsoft Word documents (.docx format).
-     *
-     * @param filePath the path to a DOCX file
-     * @return extracted text from the DOCX document
-     * @throws IOException if the file cannot be opened or parsed
+     * Extracts text from a DOCX file.
      */
     private static String readDocxAsString(Path filePath) throws IOException {
         try (FileInputStream fis = new FileInputStream(filePath.toFile());
@@ -119,11 +125,7 @@ public class ReadFileUtil {
     }
 
     /**
-     * Extracts text from legacy Microsoft Word documents (.doc format).
-     *
-     * @param filePath the path to a DOC file
-     * @return extracted text from the DOC document
-     * @throws IOException if the file cannot be opened or parsed
+     * Extracts text from a DOC file.
      */
     private static String readDocAsString(Path filePath) throws IOException {
         try (FileInputStream fis = new FileInputStream(filePath.toFile());
@@ -134,54 +136,37 @@ public class ReadFileUtil {
     }
 
     /**
-     * Extracts text content from Excel files (.xls or .xlsx).
-     * Iterates through all sheets, rows, and cells, preserving tabular structure with tabs and newlines.
-     *
-     * @param filePath the path to the Excel file
-     * @return extracted cell data as a formatted string
-     * @throws IOException if the Excel file cannot be read or parsed
+     * Extracts text from an Excel file (.xls or .xlsx).
      */
     public static String getExcelDataAsString(String filePath) throws IOException {
         StringBuilder sb = new StringBuilder();
         FileInputStream fis = new FileInputStream(filePath);
         Workbook workbook = WorkbookFactory.create(fis);
 
-        // Iterate through each sheet
         for (Sheet sheet : workbook) {
-            // Iterate through each row in the sheet
             for (Row row : sheet) {
-                // Iterate through each cell in the row
                 for (Cell cell : row) {
-                    // Get cell value as a string, handling different cell types
                     switch (cell.getCellType()) {
-                        case STRING:
-                            sb.append(cell.getStringCellValue());
-                            break;
-                        case NUMERIC:
+                        case STRING -> sb.append(cell.getStringCellValue());
+                        case NUMERIC -> {
                             if (DateUtil.isCellDateFormatted(cell)) {
                                 sb.append(cell.getDateCellValue());
                             } else {
                                 sb.append(cell.getNumericCellValue());
                             }
-                            break;
-                        case BOOLEAN:
-                            sb.append(cell.getBooleanCellValue());
-                            break;
-                        case FORMULA:
-                            // Evaluate formula to get its result as a string
+                        }
+                        case BOOLEAN -> sb.append(cell.getBooleanCellValue());
+                        case FORMULA -> {
                             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
                             CellValue cellValue = evaluator.evaluate(cell);
                             sb.append(cellValue.getStringValue());
-                            break;
-                        case BLANK:
-                            sb.append(""); // Or handle as desired
-                            break;
-                        default:
-                            sb.append(cell.toString()); // Fallback for other types
+                        }
+                        case BLANK -> sb.append("");
+                        default -> sb.append(cell.toString());
                     }
-                    sb.append("\t"); // Use tab as a delimiter between cells
+                    sb.append("\t");
                 }
-                sb.append("\n"); // Newline after each row
+                sb.append("\n");
             }
         }
 
@@ -191,12 +176,7 @@ public class ReadFileUtil {
     }
 
     /**
-     * Extracts text from PowerPoint presentations (.pptx or .ppt).
-     * Reads text from all slides and text boxes, concatenating content with line breaks.
-     *
-     * @param filePath the path to the PowerPoint file
-     * @return extracted text from all slides
-     * @throws IOException if the PowerPoint file cannot be read
+     * Extracts text from a PowerPoint file (.ppt or .pptx).
      */
     public static String getPptDataAsString(Path filePath) throws IOException {
         StringBuilder textBuilder = new StringBuilder();
@@ -205,27 +185,20 @@ public class ReadFileUtil {
 
             for (XSLFSlide slide : ppt.getSlides()) {
                 for (XSLFShape shape : slide.getShapes()) {
-                    if (shape instanceof XSLFTextShape) {
-                        XSLFTextShape textShape = (XSLFTextShape) shape;
+                    if (shape instanceof XSLFTextShape textShape) {
                         String text = textShape.getText();
                         if (text != null && !text.trim().isEmpty()) {
-                            textBuilder.append(text).append("\n"); // Add new line for separation
+                            textBuilder.append(text).append("\n");
                         }
                     }
-                    // You might need to handle other shape types like tables if they contain text
                 }
             }
         }
-        return textBuilder.toString().trim(); // Remove trailing newlines
+        return textBuilder.toString().trim();
     }
 
     /**
-     * Extracts text from PDF documents.
-     * Uses Apache PDFBox to parse text content from each page.
-     *
-     * @param filePath the path to the PDF file
-     * @return the extracted text from the PDF
-     * @throws IOException if the file cannot be opened or parsed
+     * Extracts text from a PDF file using PDFBox.
      */
     private static String readPdfAsString(Path filePath) throws IOException {
         try (var inputStream = Files.newInputStream(filePath);
@@ -237,12 +210,7 @@ public class ReadFileUtil {
     }
 
     /**
-     * Reads an SQL file and returns its full contents as a string.
-     * Uses a buffered reader to read the file line by line and preserve formatting.
-     *
-     * @param filePath the path to the SQL file
-     * @return the complete SQL script as a string
-     * @throws IOException if the file cannot be opened or read
+     * Reads an SQL file and returns the content as a string.
      */
     public static String readSqlAsString(Path filePath) throws IOException {
         StringBuilder sqlContent = new StringBuilder();
@@ -254,10 +222,17 @@ public class ReadFileUtil {
         }
         return sqlContent.toString();
     }
+
+    /**
+     * Reads a JSON file into a string.
+     */
     public static String readJsonAsString(Path filePath) throws IOException {
         return Files.readString(filePath, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Reads a JSONL/NDJSON file into a string.
+     */
     public static String readJsonlAsString(Path filePath) throws IOException {
         StringBuilder sb = new StringBuilder();
         try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
@@ -269,6 +244,9 @@ public class ReadFileUtil {
         return sb.toString();
     }
 
+    /**
+     * Reads an XML file and returns its content as a string.
+     */
     public static String readXmlAsString(Path filePath) throws IOException {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -279,7 +257,6 @@ public class ReadFileUtil {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(new InputSource(new FileReader(filePath.toFile())));
 
-            // Convert XML back to text for display
             StringWriter writer = new StringWriter();
             writeNode(document, "", writer);
             return writer.toString();
@@ -304,6 +281,9 @@ public class ReadFileUtil {
         writer.write(indent + "</" + node.getNodeName() + ">\n");
     }
 
+    /**
+     * Reads a YAML file and converts its contents into a string representation.
+     */
     public static String readYamlAsString(Path filePath) throws IOException {
         Yaml yaml = new Yaml();
         try (InputStream inputStream = Files.newInputStream(filePath)) {
@@ -320,8 +300,11 @@ public class ReadFileUtil {
         }
     }
 
+    /**
+     * Reads an HTML file and extracts the visible text content.
+     */
     public static String readHtmlAsString(Path filePath) throws IOException {
         String html = Files.readString(filePath, StandardCharsets.UTF_8);
-        return Jsoup.parse(html).text(); // Extracts visible text content
+        return Jsoup.parse(html).text();
     }
 }
