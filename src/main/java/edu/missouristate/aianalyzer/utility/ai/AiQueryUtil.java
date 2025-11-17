@@ -79,16 +79,17 @@ public class AiQueryUtil {
      * Analyzes an image and determines whether it contains a single human face,
      * two faces, a group of three or more faces, or no human faces at all.
      *
-     * If no human faces are detected, the method returns the word "miscellaneous".
+     * If no human faces are detected, the method returns a description of what was photographed.
      *
      * @param image A URI reference to the uploaded image.
      * @param fileInterpretation The image type (such as image/jpeg).
-     * @return One of the following: "single", "two", "group", or "miscellaneous".
+     * @return One of the following: "single", "two", "group", or a description of what is in the photo.
      * @throws IOException If the image reference cannot be read.
      */
     public String respondWithImageCategory(String image, String fileInterpretation) throws IOException {
         Content content = Content.fromParts(
-                Part.fromText("Provide the word single, two, or group based on the amount of human faces in this photo. If there are not human faces respond with miscellaneous."),
+                Part.fromText("Provide the word single, two, or group based on the amount of human faces in this photo. If there are not human faces respond with" +
+                        "a word describing the contents of the photo such as landscape, event, food, pets, sports, or miscellaneous."),
                 Part.fromUri(image, fileInterpretation));
 
         CompletableFuture<GenerateContentResponse> responseFuture =
