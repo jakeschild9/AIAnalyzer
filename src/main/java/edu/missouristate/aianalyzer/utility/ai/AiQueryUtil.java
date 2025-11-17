@@ -88,8 +88,9 @@ public class AiQueryUtil {
      */
     public String respondWithImageCategory(String image, String fileInterpretation) throws IOException {
         Content content = Content.fromParts(
-                Part.fromText("Provide the word single, two, or group based on the amount of human faces in this photo. If there are not human faces respond with" +
-                        "a word describing the contents of the photo such as landscape, event, food, pet, sport, or miscellaneous."),
+                Part.fromText("Provide the word single or two based on the amount of human faces in this photo if its a" +
+                        "group provide the word description sport, hiking, cooking, event, or gathering. If there are not human faces respond with" +
+                        "a word describing the contents of the photo such as landscape, food, or miscellaneous."),
                 Part.fromUri(image, fileInterpretation));
 
         CompletableFuture<GenerateContentResponse> responseFuture =
