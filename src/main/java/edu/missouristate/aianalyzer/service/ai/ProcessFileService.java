@@ -2,6 +2,7 @@ package edu.missouristate.aianalyzer.service.ai;
 
 import edu.missouristate.aianalyzer.utility.ai.AiQueryUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import edu.missouristate.aianalyzer.service.database.VirusScanService;
 
@@ -24,6 +25,8 @@ import static edu.missouristate.aianalyzer.model.FileInterpretation.SUPPORTED_FI
 @Service
 @RequiredArgsConstructor
 public class ProcessFileService {
+
+    private final AiQueryUtil AiQueryUtil;
 
     /** Virus scanning service used to detect and persist scan results. */
     private final VirusScanService virusScanService;
