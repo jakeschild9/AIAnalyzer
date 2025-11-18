@@ -14,6 +14,8 @@ public class AiClient {
     public Client googleGenAiClient() {
         return Client.builder()
                 .vertexAI(true)
+                .project("basic-dispatch-476219-m5")
+                .location("us-central1")
                 .build();
     }
 }
