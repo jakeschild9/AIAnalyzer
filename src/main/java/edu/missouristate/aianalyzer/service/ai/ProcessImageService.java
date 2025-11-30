@@ -71,7 +71,7 @@ public class ProcessImageService {
             uploadObject("images" + filePath, String.valueOf(filePath));
             return AiQueryService.respondWithImageCategory(
                     "gs://aianalyser/images" + filePath,
-                    ReadImageUtil.readImageType(fileType)
+                    ReadImageUtil.readImageType(fileType).getType()
             );
 
         } catch (IOException e) {

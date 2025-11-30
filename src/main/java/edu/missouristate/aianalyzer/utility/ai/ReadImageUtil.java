@@ -18,7 +18,9 @@ import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObjec
  * Utility service for reading and processing image files.
  * Provides methods for detecting image types, converting images to JPG,
  * and uploading images to storage.
+ *
  */
+
 @Service
 @RequiredArgsConstructor
 public class ReadImageUtil {
@@ -30,12 +32,12 @@ public class ReadImageUtil {
      * @return the corresponding internal FileType string
      * @throws IOException if the image type is unknown or unsupported
      */
-    public static String readImageType(String type) throws IOException {
+    public static FileInterpretation.FileType readImageType(String type) throws IOException {
         return switch (type.toLowerCase()) {
-            case "png" -> FileInterpretation.FileType.PNG.getType();
-            case "jpg" -> FileInterpretation.FileType.JPG.getType();
-            case "jpeg" -> FileInterpretation.FileType.JPEG.getType();
-            case "webp" -> FileInterpretation.FileType.WEBP.getType();
+            case "png" -> FileInterpretation.FileType.PNG;
+            case "jpg" -> FileInterpretation.FileType.JPG;
+            case "jpeg" -> FileInterpretation.FileType.JPEG;
+            case "webp" -> FileInterpretation.FileType.WEBP;
             default -> throw new IllegalArgumentException("Unknown image type: " + type);
         };
     }
@@ -51,27 +53,24 @@ public class ReadImageUtil {
      * @throws IM4JavaException if an error occurs during ImageMagick execution
      */
     public static void uploadJpgImage(String inputFilePath) throws IOException, InterruptedException, IM4JavaException {
-        ensureImageMagickInstalled();
 
-        // Set global ImageMagick search path
-        ProcessStarter.setGlobalSearchPath(magickPath.getParent().toString());
-
-        // Change file extension to .jpg
-        File outputFile = changeExtension(new File(inputFilePath), ".jpg");
-
-        // Prepare ImageMagick operation
-        IMOperation op = new IMOperation();
-        op.addImage(inputFilePath);
-        op.addImage(outputFile.getAbsolutePath());
-
-        // Execute conversion
-        ConvertCmd convert = new ConvertCmd(false);
-        convert.run(op);
-
-        System.out.println("Converted to " + outputFile.getAbsolutePath());
+        File outputFile = convertImageToJpg(inputFilePath);
 
         // Upload converted image
         uploadObject("images" + outputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+    }
+
+    public static File convertImageToJpg(String inputFilePath) throws IOException, InterruptedException, IM4JavaException {
+        ensureImageMagickInstalled();
+        ProcessStarter.setGlobalSearchPath(magickPath.getParent().toString());
+        File outputFile = changeExtension(new File(inputFilePath), ".jpg");
+        IMOperation op = new IMOperation();
+        op.addImage(inputFilePath);
+        op.addImage(outputFile.getAbsolutePath());
+        ConvertCmd convert = new ConvertCmd(false);
+        convert.run(op);
+        System.out.println("Converted to " + outputFile.getAbsolutePath());
+        return outputFile;
     }
 
     /**

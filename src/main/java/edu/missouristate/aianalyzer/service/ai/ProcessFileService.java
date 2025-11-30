@@ -58,10 +58,13 @@ public class ProcessFileService {
             return "File does not exist: " + filePath;
         }
 
-        // Perform virus scan before reading or processing the file
+        if (!SUPPORTED_FILE_TYPES.contains(fileType.toLowerCase())) {
+            return "This file type cannot be processed: " + fileType;
+        }
+
+            // Perform virus scan before reading or processing the file
         try {
-            boolean infected = virusScanService.scanAndPersist(filePath);
-            if (infected) {
+            if (virusScanService.scanAndPersist(filePath)) {
                 return "Virus detected in file: " + filePath.getFileName();
             }
         } catch (Exception e) {
@@ -71,19 +74,12 @@ public class ProcessFileService {
         fileSize = filePath.toFile().length();
 
         try {
-            if (SUPPORTED_FILE_TYPES.contains(fileType.toLowerCase())) {
-
-                if (fileSize <= maxFileSize) {
-                    return AiQueryUtil.processSmallFileAIResponse(filePath, fileType);
-                } else {
-                    return AiQueryUtil.processLargeFileAIResponse(filePath, fileType);
-                }
-
+            if (fileSize <= maxFileSize) {
+                return AiQueryUtil.processSmallFileAIResponse(filePath, fileType);
             } else {
-                return "This file type cannot be processed: " + fileType;
+                return AiQueryUtil.processLargeFileAIResponse(filePath, fileType);
             }
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             return "Error processing file: " + e.getMessage();
         }
     }

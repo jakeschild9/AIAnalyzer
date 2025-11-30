@@ -4,6 +4,7 @@ import edu.missouristate.aianalyzer.model.database.FileRecord;
 import edu.missouristate.aianalyzer.model.database.ScanQueueItem;
 import edu.missouristate.aianalyzer.repository.database.FileRecordRepository;
 import edu.missouristate.aianalyzer.repository.database.ScanQueueItemRepository;
+import edu.missouristate.aianalyzer.service.photos.FindDuplicatesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,9 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Set;
 
+import static edu.missouristate.aianalyzer.model.FileInterpretation.IMAGE_TYPES;
+import static edu.missouristate.aianalyzer.model.FileInterpretation.SUPPORTED_FILE_TYPES;
+
 /*
     This will be the "Consumer" which runs in the background and pulls tasks from the scan_queue
 */
@@ -36,6 +40,7 @@ public class FileProcessingService {
 
     private final ScanQueueItemRepository scanQueueItemRepository;
     private final FileRecordRepository fileRecordRepository;
+
 
     private static final int BATCH_SIZE = 50; // How many items to process per run
 
@@ -76,6 +81,7 @@ public class FileProcessingService {
         FileRecord fileRecord = fileRecordRepository.findByPath(pathStr)
                 .orElse(new FileRecord()); // Create a new record if it doesn't exist.
 
+        String hash;
         fileRecord.setPath(pathStr);
         fileRecord.setParentPath(path.getParent() != null ? path.getParent().toString() : "");
         fileRecord.setLastScannedUnix(Instant.now().getEpochSecond());
@@ -94,7 +100,11 @@ public class FileProcessingService {
             fileRecord.setKind(detectKindFromExtension(ext)); // Simplified kind detection
 
             // Calculate content hash (from QueueWorker's handleImageDeep logic)
-            String hash = calculateSha256(path, 256 * 1024 * 1024); // 256MB limit
+            if (IMAGE_TYPES.contains(ext.toLowerCase())) {
+                hash = String.valueOf(FindDuplicatesService.calculateImageHash(String.valueOf(path)));
+            } else {
+                hash = calculateSha256(path, 256 * 1024 * 1024); // 256MB limit
+            }
             fileRecord.setContentHash(hash);
         }
 

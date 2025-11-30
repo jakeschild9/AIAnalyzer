@@ -136,6 +136,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
+        <dependency>
+            <groupId>dev.brachtendorf</groupId>
+            <artifactId>JImageHash</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <!--        Mockito for creating Fake classes when testing to prevent holdups -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
