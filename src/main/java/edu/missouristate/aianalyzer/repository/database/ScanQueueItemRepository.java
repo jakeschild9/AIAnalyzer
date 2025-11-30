@@ -21,6 +21,10 @@ public interface ScanQueueItemRepository extends JpaRepository<ScanQueueItem, Lo
      * @param pageable      An object that tells the query how many items to return (the batch size).
      * @return A list of ScanQueueItem entities ready to be processed.
      */
-    List<ScanQueueItem> findAllByNotBeforeUnixLessThanEqualOrderByNotBeforeUnix(long notBeforeUnix, Pageable pageable);
+    List<ScanQueueItem>
+    findAllByNotBeforeUnixLessThanEqualOrderByAttemptsAscNotBeforeUnixAsc(
+            long notBeforeUnix,
+            Pageable pageable
+    );
 }
 
