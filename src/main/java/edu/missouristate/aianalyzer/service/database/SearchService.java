@@ -5,6 +5,10 @@ import edu.missouristate.aianalyzer.repository.database.FileRecordRepository;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+/**
+ * Search function for FileRecords, can be used in the UI search function
+ * Wraps FileRecordRepository for paging and sorting by AI analysis.
+ */
 @Service
 public class SearchService {
 

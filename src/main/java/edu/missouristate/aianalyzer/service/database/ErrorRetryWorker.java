@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
+/**
+ * Schedules a worker to retry failed operations
+ */
 @Component
 public class ErrorRetryWorker {
     private final ErrorLogService errorLogService;
@@ -19,6 +22,9 @@ public class ErrorRetryWorker {
         this.scanQueueItemRepository = scanQueueItemRepository;
     }
 
+    /**
+     * Looks for high priority errors and enqueues them for Active_AI processing
+     */
     @Scheduled(fixedDelay = 60_000)
     public void retryHighPriority() {
         for (ErrorLog e : errorLogService.pendingHighPriority(50)) {
@@ -33,6 +39,9 @@ public class ErrorRetryWorker {
         }
     }
 
+    /**
+     *Enqueues ScanQueueItem for ACTIVE_AI processing for a path
+     */
     private boolean enqueueActiveAi(String pathStr) {
         try {
             ScanQueueItem item = new ScanQueueItem();

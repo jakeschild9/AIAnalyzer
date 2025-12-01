@@ -5,6 +5,10 @@ import edu.missouristate.aianalyzer.repository.database.ErrorLogRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for creating and updating ErrorLog Entries
+ * Centralizes error logging to then integrate the retry worker
+ */
 @Service
 public class ErrorLogService {
     private final ErrorLogRepository repo;
@@ -24,6 +28,10 @@ public class ErrorLogService {
         return repo.save(e);
     }
 
+    /**
+     * Marks an error as retryinh and increments the retry count.
+     * Timestamps are updated for the last attempt.
+     */
     public void markRetrying(Long id) {
         repo.findById(id).ifPresent(e -> {
             e.setStatus("retrying");
@@ -33,14 +41,23 @@ public class ErrorLogService {
         });
     }
 
+    /**
+     * Marks errors as resolved once operation succeeds
+     */
     public void markResolved(Long id) {
         repo.findById(id).ifPresent(e -> { e.setStatus("resolved"); repo.save(e); });
     }
 
+    /**
+     * Returns list of errors that are pending or retrying
+     */
     public java.util.List<ErrorLog> pendingHighPriority(int limit) {
         return repo.findPendingHighPriority(PageRequest.of(0, limit));
     }
 
+    /**
+     * captures stack trace as a string
+     */
     private static String stackTrace(Throwable t) {
         java.io.StringWriter sw = new java.io.StringWriter();
         t.printStackTrace(new java.io.PrintWriter(sw));

@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 
+/**
+ * Stores value of a user preference
+ * They are then stored, and tracked using namespace, pref_key, and user_id
+ */
 @Entity
 @Table(name = "user_preference",
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_id","namespace","pref_key"}))

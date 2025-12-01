@@ -11,6 +11,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.List;
 
+/**
+ * Repository for accessing FileRecords.
+ * Files are recorded by its path
+ */
 @Repository
 public interface FileRecordRepository extends JpaRepository<FileRecord, Long> {
 

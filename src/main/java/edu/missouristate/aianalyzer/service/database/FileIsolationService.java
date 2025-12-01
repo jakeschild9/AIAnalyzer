@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.Comparator;
 
+/**
+ * Service to isolate, purge, and release files for quarantine
+ */
 @Service
 public class FileIsolationService {
 

@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
+/**
+ * Stores a log of errors that are either pending retry, or being retried, and orders them from oldest to newest.
+ */
 public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
     @Query("""
     select e from ErrorLog e

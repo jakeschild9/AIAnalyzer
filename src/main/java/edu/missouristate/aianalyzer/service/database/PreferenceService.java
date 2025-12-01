@@ -13,6 +13,10 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/**
+ * Service to read and write preferences of the user.
+ * Uses getters for STRING, BOOl, INTS and JSON values.
+ */
 @Service
 @RequiredArgsConstructor
 public class PreferenceService {

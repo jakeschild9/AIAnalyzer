@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 
+
+/**
+ * Records User decisions about a file
+ * If a file is marked as infected, the user can mark it as clean and the decision will be saved
+ */
 @Entity
 @Table(
         name = "user_decision_log",
