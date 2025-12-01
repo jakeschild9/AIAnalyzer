@@ -1,0 +1,35 @@
+/* ===================================================================
+ * Oceans Depth Theme - Deep Sea
+ * Dark blue depths with cyan accents
+ * ================================================================= */
+
+.root {
+    /* --- CORE PALETTE --- */
+    -fx-custom-background: #0E1C2A;
+    -fx-custom-header: #122433;
+    -fx-custom-surface: #15263B;
+    -fx-custom-border: #1d3149;
+
+    /* --- TEXT --- */
+    -fx-custom-text-primary: #E0E0E0;
+    -fx-custom-text-secondary: #B0BEC5;
+    -fx-custom-text-muted: #95A5A6;
+    -fx-custom-text-highlight: #ffffff;
+
+    /* --- ACCENTS --- */
+    -fx-custom-accent: #00BCD4;
+    -fx-custom-accent-hover: rgba(0, 188, 212, 0.12);
+
+    /* --- TRACKS (Progress Bars) --- */
+    -fx-custom-track: #1d3149;
+
+    /* --- STATUS COLORS --- */
+    -fx-custom-status-safe: #4CAF50;
+    -fx-custom-status-suspicious: #FF9800;
+    -fx-custom-status-malicious: #F44336;
+    -fx-custom-status-unclassified: #2196F3;
+
+    /* Drive Tree View */
+    -fx-custom-drive-bar: rgba(0, 188, 212, 0.3);
+    -fx-custom-split-divider: #0E1C2A;
+}

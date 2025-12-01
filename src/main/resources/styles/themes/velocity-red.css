@@ -1,0 +1,35 @@
+/* ===================================================================
+ * Velocity Red Theme - Dark with Red Energy
+ * Near-black background with vibrant red accents
+ * ================================================================= */
+
+.root {
+    /* --- CORE PALETTE --- */
+    -fx-custom-background: #1F1112;
+    -fx-custom-header: #281517;
+    -fx-custom-surface: #331a1c;
+    -fx-custom-border: #402123;
+
+    /* --- TEXT --- */
+    -fx-custom-text-primary: #FAFAFA;
+    -fx-custom-text-secondary: #D0D0D0;
+    -fx-custom-text-muted: #B0BEC5;
+    -fx-custom-text-highlight: #ffffff;
+
+    /* --- ACCENTS --- */
+    -fx-custom-accent: #FF5252;
+    -fx-custom-accent-hover: rgba(255, 82, 82, 0.12);
+
+    /* --- TRACKS (Progress Bars) --- */
+    -fx-custom-track: #402123;
+
+    /* --- STATUS COLORS --- */
+    -fx-custom-status-safe: #4CAF50;
+    -fx-custom-status-suspicious: #FF9800;
+    -fx-custom-status-malicious: #F44336;
+    -fx-custom-status-unclassified: #2196F3;
+
+    /* Drive Tree View */
+    -fx-custom-drive-bar: rgba(255, 82, 82, 0.3);
+    -fx-custom-split-divider: #1F1112;
+}

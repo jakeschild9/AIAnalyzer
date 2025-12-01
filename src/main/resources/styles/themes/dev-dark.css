@@ -1,0 +1,30 @@
+.root {
+    /* --- CORE PALETTE --- */
+    -fx-custom-background: #1e1e1e;
+    -fx-custom-header: #252526;
+    -fx-custom-surface: #2b2b2b;
+    -fx-custom-border: #333333;  /* Safe! No collision with -fx-border-color */
+
+    /* --- TEXT --- */
+    -fx-custom-text-primary: #e0e0e0;
+    -fx-custom-text-secondary: #a0a0a0;
+    -fx-custom-text-muted: #666666;
+    -fx-custom-text-highlight: #ffffff;
+
+    /* --- ACCENTS --- */
+    -fx-custom-accent: #009688;
+    -fx-custom-accent-hover: rgba(255, 255, 255, 0.05);
+
+    /* --- TRACKS (Progress Bars) --- */
+    -fx-custom-track: #3a3a3a;
+
+    /* --- STATUS COLORS --- */
+    -fx-custom-status-safe: #4CAF50;
+    -fx-custom-status-suspicious: #FF9800;
+    -fx-custom-status-malicious: #F44336;
+    -fx-custom-status-unclassified: #2196F3;
+
+    /* Drive Tree View */
+    -fx-custom-drive-bar: rgba(0, 120, 215, 0.3); /* The transparent blue */
+    -fx-custom-split-divider: #1e1e1e;            /* SplitPane divider color */
+}

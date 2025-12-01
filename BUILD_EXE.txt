@@ -1,0 +1,28 @@
+HOW TO BUILD AIANALYZER EXE
+===========================
+Prerequisites:
+- Requires JDK 21 installed at: E:\Program Files\Java\jdk-21\
+
+NOTE: Steps 1 and 2 can be achieved though Maven > project > Lifecycles UI in Intellij
+
+STEP 1: Build the JAR file
+--------------------------
+.\mvnw.cmd clean package -DskipTests
+
+
+STEP 2: Clean previous build artifacts (PowerShell)
+---------------------------------------------------
+Remove-Item -Recurse -Force .\AIAnalyzer\
+
+
+STEP 3: Create the EXE (using JDK 21 jpackage)
+----------------------------------------------
+& "E:\Program Files\Java\jdk-21\bin\jpackage.exe" --input target/ --name AIAnalyzer --main-jar AIAnalyzer-0.0.1-SNAPSHOT.jar --type app-image --java-options "--enable-preview"
+
+# NOTE: If the app crashes silently, run this version instead to see the error console:
+# & "E:\Program Files\Java\jdk-21\bin\jpackage.exe" --input target/ --name AIAnalyzer --main-jar AIAnalyzer-0.0.1-SNAPSHOT.jar --type app-image --win-console --java-options "--enable-preview"
+
+
+STEP 4: Run the App
+-------------------
+.\AIAnalyzer\AIAnalyzer.exe

@@ -1,0 +1,35 @@
+/* ===================================================================
+ * Forest Edge Theme - Deep Woods
+ * Dark forest green with vibrant green accents
+ * ================================================================= */
+
+.root {
+    /* --- CORE PALETTE --- */
+    -fx-custom-background: #162723;
+    -fx-custom-header: #1d322d;
+    -fx-custom-surface: #243d37;
+    -fx-custom-border: #2a4841;
+
+    /* --- TEXT --- */
+    -fx-custom-text-primary: #D4D9D8;
+    -fx-custom-text-secondary: #A0ACA8;
+    -fx-custom-text-muted: #6B7773;
+    -fx-custom-text-highlight: #ffffff;
+
+    /* --- ACCENTS --- */
+    -fx-custom-accent: #4CAF50;
+    -fx-custom-accent-hover: rgba(76, 175, 80, 0.12);
+
+    /* --- TRACKS (Progress Bars) --- */
+    -fx-custom-track: #2a4841;
+
+    /* --- STATUS COLORS --- */
+    -fx-custom-status-safe: #4CAF50;
+    -fx-custom-status-suspicious: #FF9800;
+    -fx-custom-status-malicious: #F44336;
+    -fx-custom-status-unclassified: #2196F3;
+
+    /* Drive Tree View */
+    -fx-custom-drive-bar: rgba(76, 175, 80, 0.3);
+    -fx-custom-split-divider: #162723;
+}
