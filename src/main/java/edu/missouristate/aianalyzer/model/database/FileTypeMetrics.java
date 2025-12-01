@@ -3,7 +3,10 @@ package edu.missouristate.aianalyzer.model.database;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
-
+/*
+ *Metrics for txt based file types
+ * Power charts and reports to the UI without scanning the whole files table.
+ */
 @Entity
 @Table(
         name = "file_type_metrics",
@@ -20,6 +23,7 @@ public class FileTypeMetrics {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //File type ID ex: .pdf
     @Column(name="file_type", nullable=false, unique=true)
     private String fileType;
 

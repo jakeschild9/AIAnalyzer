@@ -9,13 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
-import java.util.Collection;
 import java.util.List;
 
 @Repository
 public interface FileRecordRepository extends JpaRepository<FileRecord, Long> {
-    // Spring Data JPA gives us findAll(), save(), etc. for free.
-    // We can add custom methods like this one.
+
     Optional<FileRecord> findByPath(String path);
 
     Optional<FileRecord> findTopByContentHashOrderByAiAnalyzedUnixDesc(String contentHash);
@@ -28,9 +26,7 @@ public interface FileRecordRepository extends JpaRepository<FileRecord, Long> {
     """)
     Page<FileRecord> search(@Param("q") String q, Pageable pageable);
 
-    /**
-     * Returns all files whose extension is in the given list and which
-     * have a non-null contentHash. Used for duplicate-image detection.
-     */
-    List<FileRecord> findByExtInAndContentHashIsNotNull(Collection<String> exts);
+    List<FileRecord> findByContentHashAndIdNot(String contentHash, Long id);
+
+    List<FileRecord> findByContentHash(String contentHash);
 }

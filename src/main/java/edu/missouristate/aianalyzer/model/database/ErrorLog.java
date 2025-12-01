@@ -3,6 +3,11 @@ package edu.missouristate.aianalyzer.model.database;
 import jakarta.persistence.*;
 import java.time.Instant;
 
+/**
+ * The "entity" stands for a single error event.
+ * The table tracks error and retry workflows.
+ * When something encounters an exception it outputs @code ErrorLog instead of a silent fail.
+ */
 @Entity
 @Table(name = "error_log",
         indexes = {
@@ -16,12 +21,15 @@ public class ErrorLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //Creates a timestamp for when error occured and stores as Unix epoch
     @Column(name = "ts_unix", nullable = false)
     private long tsUnix = Instant.now().toEpochMilli();
 
+    //Log level ex: (Error, or Warning)
     @Column(nullable = false)
     private String level = "ERROR";
 
+    // name of service that caused the error
     @Column(nullable = false)
     private String component;
 

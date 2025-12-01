@@ -3,7 +3,9 @@ package edu.missouristate.aianalyzer.model.database;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
-
+/*
+ *Provides metrics for the whole system.
+ */
 @Entity
 @Table(name = "metrics_summary")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
