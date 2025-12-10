@@ -4,11 +4,14 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 
+<<<<<<< HEAD
 /**
  * Represents a virus scan for a specific file.
  * VirusScan then captures the result using ClamAv.
  * Stores the value 0 = clean 1 = infected
  */
+=======
+>>>>>>> clean-feature-branch
 @Entity
 @Table(name = "virus_scan", indexes = {
         @Index(name = "ix_vs_file_time", columnList = "file_id, scanned_at")

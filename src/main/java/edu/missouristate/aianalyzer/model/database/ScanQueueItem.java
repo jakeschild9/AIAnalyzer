@@ -3,10 +3,13 @@ package edu.missouristate.aianalyzer.model.database;
 import jakarta.persistence.*;
 import lombok.Data;
 
+<<<<<<< HEAD
 /**
  * ScanQueueItem is a single item in the scan queue.
  * The scan is used to decouple file dicovery to reduce processing cost, and inserts a worker to consume them on background threads
  */
+=======
+>>>>>>> clean-feature-branch
 @Data
 @Entity
 @Table(name = "scan_queue",

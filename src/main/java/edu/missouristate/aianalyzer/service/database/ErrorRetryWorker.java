@@ -8,9 +8,12 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
+<<<<<<< HEAD
 /**
  * Schedules a worker to retry failed operations
  */
+=======
+>>>>>>> clean-feature-branch
 @Component
 public class ErrorRetryWorker {
     private final ErrorLogService errorLogService;
@@ -22,9 +25,12 @@ public class ErrorRetryWorker {
         this.scanQueueItemRepository = scanQueueItemRepository;
     }
 
+<<<<<<< HEAD
     /**
      * Looks for high priority errors and enqueues them for Active_AI processing
      */
+=======
+>>>>>>> clean-feature-branch
     @Scheduled(fixedDelay = 60_000)
     public void retryHighPriority() {
         for (ErrorLog e : errorLogService.pendingHighPriority(50)) {
@@ -39,9 +45,12 @@ public class ErrorRetryWorker {
         }
     }
 
+<<<<<<< HEAD
     /**
      *Enqueues ScanQueueItem for ACTIVE_AI processing for a path
      */
+=======
+>>>>>>> clean-feature-branch
     private boolean enqueueActiveAi(String pathStr) {
         try {
             ScanQueueItem item = new ScanQueueItem();

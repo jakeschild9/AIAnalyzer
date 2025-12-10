@@ -1,0 +1,35 @@
+/* ===================================================================
+ * Monolith Theme - Pure Dark with Purple Accents
+ * Deep black background with vibrant purple highlights
+ * ================================================================= */
+
+.root {
+    /* --- CORE PALETTE --- */
+    -fx-custom-background: #1A1A1A;
+    -fx-custom-header: #252525;
+    -fx-custom-surface: #333333;
+    -fx-custom-border: #3d3d3d;
+
+    /* --- TEXT --- */
+    -fx-custom-text-primary: #E0E0E0;
+    -fx-custom-text-secondary: #C2C2C2;
+    -fx-custom-text-muted: #808080;
+    -fx-custom-text-highlight: #ffffff;
+
+    /* --- ACCENTS --- */
+    -fx-custom-accent: #8C7AE6;
+    -fx-custom-accent-hover: rgba(140, 122, 230, 0.12);
+
+    /* --- TRACKS (Progress Bars) --- */
+    -fx-custom-track: #3d3d3d;
+
+    /* --- STATUS COLORS --- */
+    -fx-custom-status-safe: #4CAF50;
+    -fx-custom-status-suspicious: #FF9800;
+    -fx-custom-status-malicious: #F44336;
+    -fx-custom-status-unclassified: #2196F3;
+
+    /* Drive Tree View */
+    -fx-custom-drive-bar: rgba(140, 122, 230, 0.3);
+    -fx-custom-split-divider: #1A1A1A;
+}

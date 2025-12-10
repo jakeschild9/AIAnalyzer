@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .root {
     -fx-background-color: -fx-primary-bg;
 
@@ -16,3 +17,40 @@
 .button:hover { -fx-background-color: derive(-fx-accent-color, -10%); }
 .text-field { -fx-background-color: -fx-secondary-bg; -fx-text-fill: -fx-primary-text; -fx-border-color: -fx-border-color; -fx-border-radius: 3; }
 .drive-tree-panel { -fx-background-color: -fx-view-bg; }
+=======
+/* ===================================================================
+ * Obsidian Theme - True Black Minimalism
+ * Pure black OLED-friendly theme with blue-gray accents
+ * ================================================================= */
+
+.root {
+    /* --- CORE PALETTE --- */
+    -fx-custom-background: #000000;
+    -fx-custom-header: #0a0a0a;
+    -fx-custom-surface: #0F0F0F;
+    -fx-custom-border: #1a1a1a;
+
+    /* --- TEXT --- */
+    -fx-custom-text-primary: #FFFFFF;
+    -fx-custom-text-secondary: #B0BEC5;
+    -fx-custom-text-muted: #607D8B;
+    -fx-custom-text-highlight: #ffffff;
+
+    /* --- ACCENTS --- */
+    -fx-custom-accent: #607D8B;
+    -fx-custom-accent-hover: rgba(96, 125, 139, 0.12);
+
+    /* --- TRACKS (Progress Bars) --- */
+    -fx-custom-track: #1a1a1a;
+
+    /* --- STATUS COLORS --- */
+    -fx-custom-status-safe: #4CAF50;
+    -fx-custom-status-suspicious: #FF9800;
+    -fx-custom-status-malicious: #F44336;
+    -fx-custom-status-unclassified: #2196F3;
+
+    /* Drive Tree View */
+    -fx-custom-drive-bar: rgba(96, 125, 139, 0.3);
+    -fx-custom-split-divider: #000000;
+}
+>>>>>>> clean-feature-branch

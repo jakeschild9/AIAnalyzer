@@ -22,6 +22,11 @@ public class FileInterpretation {
             "apk", "dmg", "bin", "vxd"
     );
 
+<<<<<<< HEAD
+=======
+    // Josh Dejeu
+    // NOTE: removed PDF from image type (unable to read image file, unsupported format or corrupted)
+>>>>>>> clean-feature-branch
     public static final Set<String> IMAGE_TYPES = Set.of(
             // Raster formats
             "png", "apng", "jpg", "jpeg", "jpe", "jfif", "jxl", "gif", "bmp", "dib",
@@ -37,7 +42,10 @@ public class FileInterpretation {
             // Vector formats (still images)
             "svg", "svgz",
             "wmf", "emf",
+<<<<<<< HEAD
             "pdf",
+=======
+>>>>>>> clean-feature-branch
 
             "xbm", "xpm"
     );

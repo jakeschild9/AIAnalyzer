@@ -6,11 +6,19 @@
 # The /target/ directory is where Maven places all compiled code and packages.
 /target/
 /build/
+<<<<<<< HEAD
+=======
+/AIAnalyzer/
+>>>>>>> clean-feature-branch
 
 # Local configuration files that should not be committed.
 # These could contain sensitive data or local database paths.
 env.properties
 aianalyzer.db
+<<<<<<< HEAD
+=======
+BUILD_EXE.txt
+>>>>>>> clean-feature-branch
 
 # Maven Wrapper JAR - This is a binary and should be downloaded, not committed.
 .mvn/wrapper/maven-wrapper.jar
@@ -18,6 +26,10 @@ aianalyzer.db
 # Log files
 *.log
 *.log.*
+<<<<<<< HEAD
+=======
+logs/
+>>>>>>> clean-feature-branch
 
 # ===================================================================
 # IDE and Editor-Specific Files
@@ -50,3 +62,22 @@ aianalyzer.db
 /.nb-gradle/
 
 /basic-dispatch-476219-m5-d8d1731bb0c8.json
+<<<<<<< HEAD
+=======
+
+# Ignore the test files folder
+ai_test_files/
+
+# Ignore the quarantine folder (and subfolders)
+quarantine/
+
+
+# Ignore SQLite temporary lock files (Essential!)
+*.db-shm
+*.db-wal
+
+
+AIAnalyzer/app/
+AIAnalyzer/runtime/
+*.jar
+>>>>>>> clean-feature-branch

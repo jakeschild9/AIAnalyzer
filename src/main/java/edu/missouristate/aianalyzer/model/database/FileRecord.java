@@ -28,10 +28,13 @@ public class FileRecord {
     private Long typeLabelUpdatedUnix;
     private String ext;
 
+<<<<<<< HEAD
     //Duplicate detector, if true then is part of a duplicate set/group
     @Column(nullable = false)
     private boolean duplicate = false;
 
+=======
+>>>>>>> clean-feature-branch
     @Deprecated
     private String aiSafety;
 

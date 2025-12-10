@@ -1,0 +1,35 @@
+/* ===================================================================
+ * Quantum Ether Theme - Modern Tech
+ * Dark slate with purple and blue accents
+ * ================================================================= */
+
+.root {
+    /* --- CORE PALETTE --- */
+    -fx-custom-background: #14171A;
+    -fx-custom-header: #1a1e22;
+    -fx-custom-surface: #1C2025;
+    -fx-custom-border: #2a2f35;
+
+    /* --- TEXT --- */
+    -fx-custom-text-primary: #E5E7EB;
+    -fx-custom-text-secondary: #9CA3AF;
+    -fx-custom-text-muted: #6B7280;
+    -fx-custom-text-highlight: #ffffff;
+
+    /* --- ACCENTS --- */
+    -fx-custom-accent: #A293F9;
+    -fx-custom-accent-hover: rgba(162, 147, 249, 0.12);
+
+    /* --- TRACKS (Progress Bars) --- */
+    -fx-custom-track: #2a2f35;
+
+    /* --- STATUS COLORS --- */
+    -fx-custom-status-safe: #4CAF50;
+    -fx-custom-status-suspicious: #FF9800;
+    -fx-custom-status-malicious: #F44336;
+    -fx-custom-status-unclassified: #2196F3;
+
+    /* Drive Tree View */
+    -fx-custom-drive-bar: rgba(162, 147, 249, 0.3);
+    -fx-custom-split-divider: #14171A;
+}

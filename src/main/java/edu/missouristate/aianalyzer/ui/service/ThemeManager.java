@@ -25,6 +25,9 @@ public class ThemeManager {
     }
 
     private void applyTheme(String theme) {
+<<<<<<< HEAD
         // Need java fx stylesheet
+=======
+>>>>>>> clean-feature-branch
     }
 }

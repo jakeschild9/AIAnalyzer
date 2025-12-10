@@ -2,8 +2,16 @@ package edu.missouristate.aianalyzer.service.ai;
 
 import edu.missouristate.aianalyzer.utility.ai.AiQueryUtil;
 import edu.missouristate.aianalyzer.utility.ai.ReadImageUtil;
+<<<<<<< HEAD
 import lombok.RequiredArgsConstructor;
 import org.im4java.core.IM4JavaException;
+=======
+import edu.missouristate.aianalyzer.utility.ai.UploadFileUtil;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.im4java.core.IM4JavaException;
+import org.springframework.beans.factory.annotation.Value;
+>>>>>>> clean-feature-branch
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -11,8 +19,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static edu.missouristate.aianalyzer.model.FileInterpretation.SUPPORTED_IMAGE_TYPES;
+<<<<<<< HEAD
 import static edu.missouristate.aianalyzer.utility.ai.ReadImageUtil.uploadJpgImage;
 import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObject;
+=======
+>>>>>>> clean-feature-branch
 
 /**
  * Service responsible for processing local image files and sending them to the AI
@@ -26,6 +37,10 @@ import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObjec
  *
  * Supported image types are defined in FileInterpretation.SUPPORTED_IMAGE_TYPES.
  */
+<<<<<<< HEAD
+=======
+@Slf4j
+>>>>>>> clean-feature-branch
 @Service
 @RequiredArgsConstructor
 public class ProcessImageService {
@@ -33,6 +48,18 @@ public class ProcessImageService {
     /** Utility class for making content-generation requests to the AI model. */
     private final AiQueryUtil AiQueryService;
 
+<<<<<<< HEAD
+=======
+    /** Utility class for uploading files to Google Cloud Storage. */
+    private final UploadFileUtil uploadFileUtil;
+
+    /** Utility class for reading and converting image files. */
+    private final ReadImageUtil readImageUtil;
+
+    private final edu.missouristate.aianalyzer.service.config.CloudConfigService cloudConfigService;
+
+
+>>>>>>> clean-feature-branch
     /**
      * Processes an image file and submits it to the AI model.
      *
@@ -53,6 +80,7 @@ public class ProcessImageService {
             return "File does not exist: " + filePath;
         }
 
+<<<<<<< HEAD
         try {
             Path parentDir = filePath.getParent();
             String newFileName = filePath.getFileName().toString().replaceFirst("\\.[^.]+$", ".jpg");
@@ -71,13 +99,53 @@ public class ProcessImageService {
             uploadObject("images" + filePath, String.valueOf(filePath));
             return AiQueryService.respondWithImageCategory(
                     "gs://aianalyser/images" + filePath,
+=======
+        String bucketName = cloudConfigService.getBucketName();
+
+        if (bucketName == null || bucketName.isEmpty()) {
+            return "Google Cloud bucket not configured. Please configure in Settings.";
+        }
+
+        try {
+            String fileName = filePath.getFileName().toString();
+            String jpgFileName = fileName.replaceFirst("\\.[^.]+$", ".jpg");
+
+            // Unsupported image types are converted to JPG and then uploaded
+            if (!SUPPORTED_IMAGE_TYPES.contains(fileType)) {
+                log.info("Converting unsupported image type {} to JPG", fileType);
+                String uploadedPath = readImageUtil.uploadJpgImage(String.valueOf(filePath));
+
+                String gcsUri = "gs://" + bucketName + "/" + uploadedPath;
+                log.info("Requesting AI analysis for converted image: {}", gcsUri);
+
+                return AiQueryService.respondWithImageCategory(gcsUri, "image/jpeg");
+            }
+
+            // Supported types are uploaded directly
+            String objectName = "images/" + fileName;
+            uploadFileUtil.uploadObject(objectName, String.valueOf(filePath));
+
+            String gcsUri = "gs://" + bucketName + "/" + objectName;
+            log.info("Requesting AI analysis for image: {}", gcsUri);
+
+            return AiQueryService.respondWithImageCategory(
+                    gcsUri,
+>>>>>>> clean-feature-branch
                     ReadImageUtil.readImageType(fileType).getType()
             );
 
         } catch (IOException e) {
+<<<<<<< HEAD
+=======
+            log.error("Error processing image file: {}", filePath, e);
+>>>>>>> clean-feature-branch
             return "Error processing file: " + e.getMessage();
         } catch (InterruptedException | IM4JavaException e) {
             throw new RuntimeException(e);
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> clean-feature-branch

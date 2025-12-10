@@ -62,6 +62,7 @@ public class ProcessFileService {
             return "This file type cannot be processed: " + fileType;
         }
 
+<<<<<<< HEAD
             // Perform virus scan before reading or processing the file
         try {
             if (virusScanService.scanAndPersist(filePath)) {
@@ -70,6 +71,16 @@ public class ProcessFileService {
         } catch (Exception e) {
             return "Error scanning file: " + e.getMessage();
         }
+=======
+        // Perform virus scan before reading or processing the file
+//        try {
+//            if (virusScanService.scanAndPersist(filePath)) {
+//                return "Virus detected in file: " + filePath.getFileName();
+//            }
+//        } catch (Exception e) {
+//            return "Error scanning file: " + e.getMessage();
+//        }
+>>>>>>> clean-feature-branch
 
         fileSize = filePath.toFile().length();
 

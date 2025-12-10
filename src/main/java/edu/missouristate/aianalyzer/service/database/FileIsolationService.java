@@ -8,10 +8,16 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Comparator;
+<<<<<<< HEAD
 
 /**
  * Service to isolate, purge, and release files for quarantine
  */
+=======
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+
+>>>>>>> clean-feature-branch
 @Service
 public class FileIsolationService {
 
@@ -27,6 +33,10 @@ public class FileIsolationService {
         Files.createDirectories(this.quarantineRoot);
     }
 
+<<<<<<< HEAD
+=======
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+>>>>>>> clean-feature-branch
     public void isolate(Long fileId) {
         FileRecord record = fileRecordRepository.findById(fileId)
                 .orElseThrow(() -> new IllegalArgumentException("File not found: id=" + fileId));

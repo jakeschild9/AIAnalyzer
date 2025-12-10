@@ -5,6 +5,10 @@ import edu.missouristate.aianalyzer.model.database.VirusScan;
 import edu.missouristate.aianalyzer.repository.database.FileRecordRepository;
 import edu.missouristate.aianalyzer.repository.database.VirusScanRepository;
 import edu.missouristate.aianalyzer.service.ai.ScanForVirusService;
+<<<<<<< HEAD
+=======
+import edu.missouristate.aianalyzer.service.metrics.MetricsService;
+>>>>>>> clean-feature-branch
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +24,10 @@ public class VirusScanService {
 
     private final FileRecordRepository fileRecordRepository;
     private final VirusScanRepository virusScanRepository;
+<<<<<<< HEAD
+=======
+    private final MetricsService metricsService;
+>>>>>>> clean-feature-branch
 
     /**
      * Runs clamscan via static method and persists the result to virus_scan.
@@ -41,6 +49,17 @@ public class VirusScanService {
                 .build());
 
         log.debug("Virus scan persisted for {} (infected={})", abs, infected);
+<<<<<<< HEAD
+=======
+        
+        // Record metrics
+        String fileType = fr.getTypeLabel() != null ? fr.getTypeLabel() : fr.getExt();
+        if (fileType == null || fileType.isEmpty()) {
+            fileType = "unknown";
+        }
+        metricsService.recordVirusScan(fileType, infected);
+        
+>>>>>>> clean-feature-branch
         return infected;
     }
 

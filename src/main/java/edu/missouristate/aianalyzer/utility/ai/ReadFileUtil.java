@@ -28,11 +28,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+<<<<<<< HEAD
 import static edu.missouristate.aianalyzer.utility.ai.ReadImageUtil.changeExtension;
 import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObject;
 
 @Service
 public class ReadFileUtil {
+=======
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+/**
+ * Utility class for reading and processing various file types.
+ * Supports conversion of documents, images, and other file formats to plain text.
+ */
+@Component
+@RequiredArgsConstructor
+public class ReadFileUtil {
+    private final UploadFileUtil uploadFileUtil;
+>>>>>>> clean-feature-branch
 
     /**
      * Reads a file as a string based on its type.
@@ -45,7 +59,26 @@ public class ReadFileUtil {
     public static String readFileAsString(Path filePath, String fileType) throws IOException {
         Path path = Paths.get(filePath.toUri());
 
+<<<<<<< HEAD
         return switch (fileType.toLowerCase()) {
+=======
+        // Validate file exists and is readable
+        if (!Files.exists(path)) {
+            throw new IOException("File does not exist: " + filePath);
+        }
+
+        if (!Files.isReadable(path)) {
+            throw new IOException("File is not readable: " + filePath);
+        }
+
+        // Check file size - warn if empty
+        long fileSize = Files.size(path);
+        if (fileSize == 0) {
+            throw new IOException("File is empty (0 bytes): " + filePath);
+        }
+
+        String content = switch (fileType.toLowerCase()) {
+>>>>>>> clean-feature-branch
             case "txt", "md", "csv" -> readFileAsString(path);
             case "json" -> readJsonAsString(path);
             case "jsonl", "ndjson" -> readJsonlAsString(path);
@@ -60,8 +93,21 @@ public class ReadFileUtil {
             case "sql" -> readSqlAsString(filePath);
             default -> throw new IOException("Unsupported file type: " + fileType);
         };
+<<<<<<< HEAD
     }
 
+=======
+
+        // Final validation
+        if (content == null || content.trim().isEmpty()) {
+            throw new IOException("Extracted content is empty for file: " + filePath.getFileName());
+        }
+
+        return content;
+    }
+
+
+>>>>>>> clean-feature-branch
     /**
      * Returns the MIME type of a document based on its extension.
      *
@@ -85,6 +131,7 @@ public class ReadFileUtil {
      * @param fileType the file type
      * @throws IOException if an I/O error occurs
      */
+<<<<<<< HEAD
     public static void uploadFile(Path filePath, String fileType) throws IOException {
         if (!Files.exists(filePath)) {
             throw new FileNotFoundException("File not found: " + filePath);
@@ -99,6 +146,41 @@ public class ReadFileUtil {
             System.out.println("Temporary file created at: " + outputFile.toPath().toAbsolutePath());
         } catch (Exception e) {
             System.err.println("An error occurred while writing to the file: " + e.getMessage());
+=======
+    public void uploadFile(Path filePath, String fileType) throws IOException {
+        // Read the file content as string
+        String fileContent = readFileAsString(filePath, fileType);
+
+        // Validate that content is not empty
+        if (fileContent == null || fileContent.trim().isEmpty()) {
+            throw new IOException("File content is empty or could not be extracted: " + filePath.getFileName());
+        }
+
+        // Create a temporary .txt file with the content
+        String fileName = filePath.getFileName().toString();
+        String txtFileName = fileName.replaceFirst("\\.[^.]+$", ".txt");
+
+        Path tempDir = Files.createTempDirectory("ai-upload");
+        Path tempFile = tempDir.resolve(txtFileName);
+
+        try {
+            // Write content to temporary txt file
+            Files.writeString(tempFile, fileContent);
+
+            // Upload to GCS with correct object name
+            String objectName = "files/" + txtFileName;
+            uploadFileUtil.uploadObject(objectName, tempFile.toString());
+
+            System.out.println("Successfully uploaded " + fileName + " as " + objectName);
+        } finally {
+            // Clean up temporary files
+            try {
+                Files.deleteIfExists(tempFile);
+                Files.deleteIfExists(tempDir);
+            } catch (IOException e) {
+                System.err.println("Warning: Could not delete temp files: " + e.getMessage());
+            }
+>>>>>>> clean-feature-branch
         }
     }
 
@@ -199,13 +281,37 @@ public class ReadFileUtil {
 
     /**
      * Extracts text from a PDF file using PDFBox.
+<<<<<<< HEAD
+=======
+     * Returns an informative message if the PDF contains no extractable text.
+>>>>>>> clean-feature-branch
      */
     private static String readPdfAsString(Path filePath) throws IOException {
         try (var inputStream = Files.newInputStream(filePath);
              var document = PDDocument.load(inputStream)) {
 
+<<<<<<< HEAD
             PDFTextStripper stripper = new PDFTextStripper();
             return stripper.getText(document);
+=======
+            // Check if PDF has pages
+            if (document.getNumberOfPages() == 0) {
+                throw new IOException("PDF file has no pages: " + filePath.getFileName());
+            }
+
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(document);
+
+            // Check if extracted text is meaningful
+            if (text == null || text.trim().isEmpty()) {
+                return "[PDF contains " + document.getNumberOfPages() +
+                        " page(s) but no extractable text. This may be an image-based PDF that requires OCR.]";
+            }
+
+            return text;
+        } catch (IOException e) {
+            throw new IOException("Failed to read PDF file: " + e.getMessage(), e);
+>>>>>>> clean-feature-branch
         }
     }
 

@@ -1,0 +1,35 @@
+/* ===================================================================
+ * Canyon Dusk Theme - Warm Desert Evening
+ * Earthy browns with terracotta accents
+ * ================================================================= */
+
+.root {
+    /* --- CORE PALETTE --- */
+    -fx-custom-background: #2C2B29;
+    -fx-custom-header: #383632;
+    -fx-custom-surface: #4A4540;
+    -fx-custom-border: #5a5550;
+
+    /* --- TEXT --- */
+    -fx-custom-text-primary: #E9E5E2;
+    -fx-custom-text-secondary: #C0BCB9;
+    -fx-custom-text-muted: #8A847F;
+    -fx-custom-text-highlight: #ffffff;
+
+    /* --- ACCENTS --- */
+    -fx-custom-accent: #B85C4F;
+    -fx-custom-accent-hover: rgba(184, 92, 79, 0.12);
+
+    /* --- TRACKS (Progress Bars) --- */
+    -fx-custom-track: #5a5550;
+
+    /* --- STATUS COLORS --- */
+    -fx-custom-status-safe: #4CAF50;
+    -fx-custom-status-suspicious: #FF9800;
+    -fx-custom-status-malicious: #F44336;
+    -fx-custom-status-unclassified: #2196F3;
+
+    /* Drive Tree View */
+    -fx-custom-drive-bar: rgba(212, 157, 157, 0.3);
+    -fx-custom-split-divider: #2C2B29;
+}

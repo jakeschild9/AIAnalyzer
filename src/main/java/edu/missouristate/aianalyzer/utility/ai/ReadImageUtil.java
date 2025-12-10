@@ -2,6 +2,10 @@ package edu.missouristate.aianalyzer.utility.ai;
 
 import edu.missouristate.aianalyzer.model.FileInterpretation;
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
+=======
+import lombok.extern.slf4j.Slf4j;
+>>>>>>> clean-feature-branch
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
@@ -12,7 +16,10 @@ import java.io.*;
 
 import static edu.missouristate.aianalyzer.utility.ai.ImageMagickDownloadUtil.ensureImageMagickInstalled;
 import static edu.missouristate.aianalyzer.utility.ai.ImageMagickDownloadUtil.magickPath;
+<<<<<<< HEAD
 import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObject;
+=======
+>>>>>>> clean-feature-branch
 
 /**
  * Utility service for reading and processing image files.
@@ -20,10 +27,19 @@ import static edu.missouristate.aianalyzer.utility.ai.UploadFileUtil.uploadObjec
  * and uploading images to storage.
  *
  */
+<<<<<<< HEAD
 
 @Service
 @RequiredArgsConstructor
 public class ReadImageUtil {
+=======
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ReadImageUtil {
+    /** Utility class for uploading files to Google Cloud Storage. */
+    private final UploadFileUtil uploadFileUtil;
+>>>>>>> clean-feature-branch
 
     /**
      * Determines the internal file type representation based on a common image extension.
@@ -48,10 +64,15 @@ public class ReadImageUtil {
      * the converted file to storage.
      *
      * @param inputFilePath the path to the original image file
+<<<<<<< HEAD
+=======
+     * @return the object name in GCS (e.g., "images/photo.jpg")
+>>>>>>> clean-feature-branch
      * @throws IOException      if the input file cannot be read or written
      * @throws InterruptedException if the ImageMagick conversion process is interrupted
      * @throws IM4JavaException if an error occurs during ImageMagick execution
      */
+<<<<<<< HEAD
     public static void uploadJpgImage(String inputFilePath) throws IOException, InterruptedException, IM4JavaException {
 
         File outputFile = convertImageToJpg(inputFilePath);
@@ -60,6 +81,20 @@ public class ReadImageUtil {
         uploadObject("images" + outputFile.getAbsolutePath(), outputFile.getAbsolutePath());
     }
 
+=======
+    public String uploadJpgImage(String inputFilePath) throws IOException, InterruptedException, IM4JavaException {
+        File outputFile = convertImageToJpg(inputFilePath);
+
+        // Upload converted image with just the filename
+        String objectName = "images/" + outputFile.getName();
+        uploadFileUtil.uploadObject(objectName, outputFile.getAbsolutePath());
+
+        log.info("Uploaded converted JPG image: {}", objectName);
+        return objectName;
+    }
+
+
+>>>>>>> clean-feature-branch
     public static File convertImageToJpg(String inputFilePath) throws IOException, InterruptedException, IM4JavaException {
         ensureImageMagickInstalled();
         ProcessStarter.setGlobalSearchPath(magickPath.getParent().toString());
@@ -69,7 +104,11 @@ public class ReadImageUtil {
         op.addImage(outputFile.getAbsolutePath());
         ConvertCmd convert = new ConvertCmd(false);
         convert.run(op);
+<<<<<<< HEAD
         System.out.println("Converted to " + outputFile.getAbsolutePath());
+=======
+        log.info("Converted to {}", outputFile.getAbsolutePath());
+>>>>>>> clean-feature-branch
         return outputFile;
     }
 
@@ -85,4 +124,8 @@ public class ReadImageUtil {
         String name = f.getName().substring(0, i);
         return new File(f.getParent(), name + newExtension);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> clean-feature-branch

@@ -4,10 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 
+<<<<<<< HEAD
 /**
  * Aduits log for preference changes.
  * When a preference is created or changed its captured and stored
  */
+=======
+>>>>>>> clean-feature-branch
 @Entity
 @Table(name = "preference_audit")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
