@@ -43,7 +43,6 @@
 //    }
 //}
 
-//New code using ImageIO for JPG, PNG, GIF, BMP, WBMP etc..
 
 package edu.missouristate.aianalyzer.service.photos;
 

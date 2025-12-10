@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.List;
+import javafx.scene.Node;
+import java.util.Map;
 
 @Component
 public class DriveView extends SplitPane {
@@ -31,6 +33,7 @@ public class DriveView extends SplitPane {
     private VBox fileListPane;
 
     private CategoryCard imagesCard, videosCard, docsCard, archivesCard, codeCard, execCard, audioCard, othersCard;
+    private CategoryCard duplicateImagesCard;
     private TreeTableView<FileItemModel> treeTable;
 
     private Timeline autoRefreshTimeline;
@@ -268,6 +271,7 @@ public class DriveView extends SplitPane {
         execCard     = new CategoryCard("Executables", "#F44336", () -> showCategory("Executables"));
         audioCard    = new CategoryCard("Audio", "#E91E63", () -> showCategory("Audio"));
         othersCard   = new CategoryCard("Others", "#757575", () -> showCategory("Others"));
+        duplicateImagesCard = new CategoryCard("Duplicate Images", "#3F51B5", () -> showCategory("Duplicate Images"));
 
         // Use TilePane for flexible grid layout
         TilePane grid = new TilePane();
@@ -275,7 +279,7 @@ public class DriveView extends SplitPane {
         grid.setVgap(15);
         grid.setPrefColumns(3);
 
-        grid.getChildren().addAll(imagesCard, videosCard, audioCard, docsCard, archivesCard, codeCard, execCard, othersCard);
+        grid.getChildren().addAll(imagesCard, videosCard, audioCard, docsCard, archivesCard, codeCard, execCard, othersCard, duplicateImagesCard);
         content.getChildren().addAll(header, grid);
 
         ScrollPane scroll = new ScrollPane(content);
@@ -291,7 +295,7 @@ public class DriveView extends SplitPane {
         fileListPane.setPadding(new Insets(20));
         fileListPane.setSpacing(10);
 
-        Button backBtn = new Button("← Back");
+        Button backBtn = new Button("< Back");
         // Use navigation button CSS class
         backBtn.getStyleClass().add("nav-button");
 
@@ -310,27 +314,113 @@ public class DriveView extends SplitPane {
         HBox topBar = new HBox(15, backBtn, title);
         topBar.setAlignment(Pos.CENTER_LEFT);
 
-        ListView<FileRecord> list = new ListView<>();
-        list.getItems().addAll(files);
-        list.setCellFactory(lv -> new ExplorerFileCell());
-        // Use list view CSS class
-        list.getStyleClass().add("custom-list-view");
+        // For all normal categories, show a flat list as before.
+        if (!"Duplicate Images".equals(category)) {
+            ListView<FileRecord> list = new ListView<>();
+            list.getItems().addAll(files);
+            list.setCellFactory(lv -> new ExplorerFileCell());
+            // Use list view CSS class
+            list.getStyleClass().add("custom-list-view");
 
+            VBox.setVgrow(list, Priority.ALWAYS);
 
-        VBox.setVgrow(list, Priority.ALWAYS);
+            if (files.isEmpty()) {
+                Label placeholder = new Label("No files found in this category.");
+                // Use CSS class for placeholder text
+                placeholder.getStyleClass().add("custom-list-placeholder");
 
-        if (files.isEmpty()) {
-            Label placeholder = new Label("No files found in this category.");
-            // Use CSS class for placeholder text
-            placeholder.getStyleClass().add("custom-list-placeholder");
+                list.setPlaceholder(placeholder);
+            }
 
-            list.setPlaceholder(placeholder);
+            fileListPane.getChildren().addAll(topBar, list);
+        } else {
+            // Special layout for duplicate images: group by content hash.
+            Node groupsView = createDuplicateGroupsView(files);
+            VBox.setVgrow(groupsView, Priority.ALWAYS);
+            fileListPane.getChildren().addAll(topBar, groupsView);
         }
 
-        fileListPane.getChildren().addAll(topBar, list);
         categoryGridPane.setVisible(false);
         fileListPane.setVisible(true);
     }
+
+    /**
+     * Builds a grouped view for duplicate images, where each group represents
+     * all files sharing the same contentHash.
+     */
+    private Node createDuplicateGroupsView(List<FileRecord> files) {
+        VBox groupsContainer = new VBox(12);
+        groupsContainer.setFillWidth(true);
+
+        if (files == null || files.isEmpty()) {
+            Label placeholder = new Label("No duplicate images found.");
+            placeholder.getStyleClass().add("custom-list-placeholder");
+            groupsContainer.getChildren().add(placeholder);
+            return groupsContainer;
+        }
+
+        // Group by contentHash (ignore null or sentinel values)
+        Map<String, List<FileRecord>> groups = files.stream()
+                .filter(fr -> fr.getContentHash() != null)
+                .filter(fr -> !fr.getContentHash().equalsIgnoreCase("ERROR")
+                        && !fr.getContentHash().equalsIgnoreCase("QUARANTINED"))
+                .collect(java.util.stream.Collectors.groupingBy(FileRecord::getContentHash));
+
+        // Only keep groups with more than one file (true duplicates)
+        List<Map.Entry<String, List<FileRecord>>> duplicateGroups = groups.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                // Sort groups by total size descending (largest duplicate sets first)
+                .sorted((e1, e2) -> {
+                    long s1 = e1.getValue().stream().mapToLong(FileRecord::getSizeBytes).sum();
+                    long s2 = e2.getValue().stream().mapToLong(FileRecord::getSizeBytes).sum();
+                    return Long.compare(s2, s1);
+                })
+                .toList();
+
+        if (duplicateGroups.isEmpty()) {
+            Label placeholder = new Label("No duplicate image groups found.");
+            placeholder.getStyleClass().add("custom-list-placeholder");
+            groupsContainer.getChildren().add(placeholder);
+            return groupsContainer;
+        }
+
+        int groupIndex = 1;
+        for (Map.Entry<String, List<FileRecord>> entry : duplicateGroups) {
+            String hash = entry.getKey();
+            List<FileRecord> groupFiles = entry.getValue();
+
+            long totalSize = groupFiles.stream().mapToLong(FileRecord::getSizeBytes).sum();
+
+            String headerText = String.format(
+                    "Group %d • %d files • %s total",
+                    groupIndex++,
+                    groupFiles.size(),
+                    formatBytes(totalSize)
+            );
+
+            TitledPane pane = new TitledPane();
+            pane.setText(headerText);
+
+            // Inside each group, reuse the ExplorerFileCell so the user sees familiar UI.
+            ListView<FileRecord> groupList = new ListView<>();
+            groupList.getItems().addAll(groupFiles);
+            groupList.setCellFactory(lv -> new ExplorerFileCell());
+            groupList.getStyleClass().add("custom-list-view");
+            groupList.setPrefHeight(Math.min(250, 50 + groupFiles.size() * 40.0)); // basic sizing
+
+            pane.setContent(groupList);
+            pane.setExpanded(false); // start collapsed for large numbers of groups
+
+            groupsContainer.getChildren().add(pane);
+        }
+
+        ScrollPane scrollPane = new ScrollPane(groupsContainer);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+
+        return scrollPane;
+    }
+
 
     // Initiates the loading of files for a specific category in a background thread.
     private void showCategory(String category) {
@@ -362,6 +452,7 @@ public class DriveView extends SplitPane {
                     updateCard(execCard, stats.get("Executables"), totalFiles);
                     updateCard(audioCard, stats.get("Audio"), totalFiles);
                     updateCard(othersCard, stats.get("Others"), totalFiles);
+                    updateCard(duplicateImagesCard, stats.get("Duplicate Images"), totalFiles);
                 });
             } catch (Exception e) {
                 e.printStackTrace();

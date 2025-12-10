@@ -65,4 +65,51 @@ public interface FileRecordRepository extends JpaRepository<FileRecord, Long> {
     // Finds all file records EXCEPT those marked with the given classification status (used to exclude "Ignored").
     Page<FileRecord> findByTypeLabelNotIgnoreCase(String typeLabel, Pageable pageable);
     // END Josh D
+
+    // --- Duplicate image support ---
+
+    /**
+     * Aggregated stats for duplicate images:
+     * - count of FileRecord entries that are part of a duplicate group
+     * - total sizeBytes of those records
+     *
+     * A duplicate group is defined as files with the same non-null contentHash
+     * and an image extension, where group size > 1.
+     */
+    @Query("""
+        SELECT COUNT(f), COALESCE(SUM(f.sizeBytes), 0)
+        FROM FileRecord f
+        WHERE LOWER(f.ext) IN :imageExts
+          AND f.contentHash IS NOT NULL
+          AND f.contentHash IN (
+                SELECT fh.contentHash
+                FROM FileRecord fh
+                WHERE LOWER(fh.ext) IN :imageExts
+                  AND fh.contentHash IS NOT NULL
+                GROUP BY fh.contentHash
+                HAVING COUNT(fh) > 1
+          )
+    """)
+    Object[] getDuplicateImageStats(@Param("imageExts") List<String> imageExts);
+
+    /**
+     * Returns all FileRecord entries that belong to duplicate image groups
+     * (same definition as above).
+     */
+    @Query("""
+        SELECT f
+        FROM FileRecord f
+        WHERE LOWER(f.ext) IN :imageExts
+          AND f.contentHash IS NOT NULL
+          AND f.contentHash IN (
+                SELECT fh.contentHash
+                FROM FileRecord fh
+                WHERE LOWER(fh.ext) IN :imageExts
+                  AND fh.contentHash IS NOT NULL
+                GROUP BY fh.contentHash
+                HAVING COUNT(fh) > 1
+          )
+        ORDER BY f.contentHash ASC, f.sizeBytes DESC
+    """)
+    List<FileRecord> findDuplicateImages(@Param("imageExts") List<String> imageExts);
 }
